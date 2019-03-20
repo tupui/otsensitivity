@@ -158,3 +158,34 @@ def plot_indices(indices, conf=None, plabels=None, polar=False, xdata=None,
     save_show(fname, figs)
 
     return figs, axs
+
+
+def pairplot(sample, data, plabels=None, flabel=None, fname=None):
+    """Output function of the input parameter space.
+
+    A n-variate plot is constructed with all couple of variables - output.
+
+    :param array_like sample: sample (n_samples, n_featrues).
+    :param array_like data: data (n_samples, 1).
+    :param list(str) plabels: parameters' names.
+    :param str flabel: label for y axis.
+    :param str fname: whether to export to filename or display the figures.
+    :returns: figure.
+    :rtype: Matplotlib figure instance, Matplotlib AxesSubplot instances.
+    """
+    sample = np.asarray(sample)
+    n_dim = sample.shape[1]
+
+    if plabels is None:
+        plabels = ['x' + str(i) for i in range(n_dim)]
+
+    fig, axs = plt.subplots(1, n_dim)
+    for i in range(n_dim):
+        axs[i].scatter(sample[:, i], data, marker='+')
+        axs[i].set_xlabel(plabels[i])
+
+    axs[0].set_ylabel('F' if flabel is None else flabel)
+
+    save_show(fname, [fig])
+
+    return fig, axs

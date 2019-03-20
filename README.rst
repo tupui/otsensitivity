@@ -18,17 +18,24 @@ What is it?
 This project implements Sensitivity Analysis methods.
 It is based on `OpenTURNS <http://www.openturns.org>`_.
 
-Example: 
+The simplest analysis is to visualize how the quantity of interest respond
+individually to each input parameter:
 
 .. code-block:: python
 
-    s, st = sobol_saltelli(model, 1000, 3, [[-np.pi, -np.pi, -np.pi],
-                                            [np.pi, np.pi, np.pi]])
+    pairplot(sample, data)
+
+.. image::  doc/images/ishigami_pairplot.png
+
+This analysis can be completed by quantitative information. Variance-based
+analysis is commonly used:
+
+.. code-block:: python
+
+    s, st = sobol_saltelli(function, 1000, 3, [[-np.pi, -np.pi, -np.pi],
+                                               [np.pi, np.pi, np.pi]])
     
     plot_indices([s, st])
-    
-
-The output is the following figure: 
 
 .. image::  doc/images/ishigami_indices.png
 

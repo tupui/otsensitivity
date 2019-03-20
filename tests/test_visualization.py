@@ -1,6 +1,6 @@
 import os
 from mock import patch
-from otsensitivity import plot_indices
+from otsensitivity import (plot_indices, pairplot)
 
 
 @patch("matplotlib.pyplot.show")
@@ -56,3 +56,10 @@ def test_indices_map(mock_show, tmp):
     plot_indices(indices)
     plot_indices(indices, plabels=['Ks', 'Q'], xdata=xdata,
                  fname=os.path.join(tmp, 'sobol_map.pdf'))
+
+
+def test_pairplot(ishigami, tmp):
+    model, sample, data = ishigami
+    pairplot(sample, data,
+             plabels=['x1', 'x2', 'x3'],
+             fname=os.path.join(tmp, 'pairplot.pdf'))
