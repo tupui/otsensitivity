@@ -12,7 +12,7 @@ def tmp(tmpdir_factory):
 @pytest.fixture(scope='session')
 def ishigami():
     # Create the model and input distribution
-    formula = ['sin(X1) + 7 * sin(X2)^2 + 0.1 * X3^4 * sin(X1)']
+    formula = ['sin(X1)+7*sin(X2)^2+0.1*X3^4*sin(X1)']
     input_names = ['X1', 'X2', 'X3']
     dimension = 3
     corners = [[-np.pi] * dimension, [np.pi] * dimension]

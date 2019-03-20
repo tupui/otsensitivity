@@ -7,3 +7,4 @@ Examples of the API
     :maxdepth: 1
 
     sobol.ipynb
+    moments.ipynb

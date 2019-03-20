@@ -40,6 +40,20 @@ It is possible to use a polar coordinate system:
 
 .. image::  doc/images/ishigami_indices-polar.png
 
+In case of an already existing sample, one can use density based measures:
+
+.. code-block:: python
+
+    momi = moment_independent(X, Y)
+    delta = momi[2]['Delta']
+    plot_indices([delta])
+
+.. image::  doc/images/ishigami_moment.png
+
+This method use not only the variance but all the PDF in order to compute
+sensitivity information. Also, it does not require the use of any particlar
+sampling design.
+
 How to install?
 ---------------
 
