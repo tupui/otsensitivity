@@ -1,0 +1,1240 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>HDR Plot &#8212; othdrplot  documentation</title>
+    <link rel="stylesheet" href="../_static/openturns.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Density Plot" href="density_plot.html" />
+    <link rel="prev" title="Examples of the API" href="examples.html" />
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400,700'
+          rel='stylesheet' type='text/css' />
+ 
+
+  </head><body>
+<div class="pageheader">
+  <ul>
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="../user_manual.html">Doc</a></li>
+    <li><a href="examples.html">Examples</a></li>
+    <li><a href="https://github.com/openturns/othdrplot">Code</a></li>
+  </ul>
+  <a href="../index.html">
+    <h1>
+      <img src="../_static/logo-openturns-wo-bg.png" alt="" width=100px height=100px />
+      othdrplot
+    </h1>
+    <h2> A module to build Probability of Detection for Non Destructive Testing. </h2>
+  </a>
+</div>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="density_plot.html" title="Density Plot"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="examples.html" title="Examples of the API"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">othdrplot  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="examples.html" accesskey="U">Examples of the API</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="examples.html"
+                        title="previous chapter">Examples of the API</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="density_plot.html"
+                        title="next chapter">Density Plot</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/examples/HDR_plot.ipynb"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 7ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    background: #f5f5f5;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<div class="section" id="HDR-Plot">
+<h1>HDR Plot<a class="headerlink" href="#HDR-Plot" title="Permalink to this headline">¶</a></h1>
+<p>The <em>El Niño</em> dataset consists of 60 years worth of averaged monthly sea surface temperature (SST) in degrees Celcius of the Pacific Ocean at 0-10 deg South and 90-80 deg West between 1950 and 2007. Years 1982-83 and 1997-98 are outliers; these are the years where <em>El Niño</em> (a climate pattern characterized by warming up of the sea surface and higher air pressures) occurred with unusual intensity.</p>
+<p>Source: NOAA - ERSSTv5 - Nino 1+2 at <a class="reference external" href="http://www.cpc.ncep.noaa.gov/data/indices/">http://www.cpc.ncep.noaa.gov/data/indices/</a></p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">openturns</span> <span class="kn">as</span> <span class="nn">ot</span>
+<span class="kn">from</span> <span class="nn">othdrplot</span> <span class="kn">import</span> <span class="n">ProcessHighDensityRegionAlgorithm</span>
+
+<span class="c1"># Configure OT</span>
+<span class="n">n_samples</span> <span class="o">=</span> <span class="mi">500</span>
+<span class="n">ot</span><span class="o">.</span><span class="n">ResourceMap</span><span class="o">.</span><span class="n">Set</span><span class="p">(</span><span class="s1">&#39;Distribution-MinimumVolumeLevelSetBySampling&#39;</span><span class="p">,</span> <span class="s1">&#39;true&#39;</span><span class="p">)</span>
+<span class="n">ot</span><span class="o">.</span><span class="n">ResourceMap</span><span class="o">.</span><span class="n">Set</span><span class="p">(</span><span class="s1">&#39;Distribution-MinimumVolumeLevelSetSamplingSize&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_samples</span><span class="p">))</span>
+
+<span class="c1"># Load the dataset</span>
+<span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="s1">&#39;../../tests/data/npfda-elnino.dat&#39;</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[[21.7  20.74 20.52 19.82 20.19 20.46 21.92 25.13 25.44 25.9  25.29 24.9 ]
+ [24.56 24.04 22.43 21.52 22.2  22.9  23.01 24.47 26.42 26.51 24.54 23.69]
+ [22.35 20.74 19.95 20.12 20.45 20.72 22.53 24.19 26.33 27.21 26.85 25.24]
+ [23.74 22.45 21.68 21.49 21.08 22.07 22.47 23.06 25.22 25.83 23.05 21.79]
+ [21.02 19.89 19.78 19.23 19.2  20.47 21.25 23.7  24.64 25.51 24.34 22.53]
+ [21.12 20.56 19.75 19.47 19.35 20.   21.1  23.67 24.78 25.76 25.06 23.3 ]
+ [22.29 21.62 20.66 19.98 19.84 20.86 21.6  23.25 26.32 27.47 26.86 26.29]
+ [24.92 23.82 22.33 21.88 21.76 22.4  23.75 24.96 26.74 27.07 26.45 25.08]
+ [23.04 22.38 20.56 20.72 20.96 21.64 22.47 24.09 25.68 27.07 25.89 24.26]
+ [22.63 21.45 20.34 20.41 20.91 21.99 22.69 24.57 25.72 26.15 24.72 23.76]
+ [22.15 21.01 20.37 20.54 20.22 20.91 22.74 24.45 26.55 25.91 24.97 23.71]
+ [22.39 20.55 19.96 19.75 20.   21.07 22.06 24.11 25.55 24.63 23.57 23.48]
+ [21.85 20.57 20.37 20.16 19.92 20.88 21.83 24.11 25.36 25.88 24.54 24.17]
+ [22.6  22.01 21.45 21.15 21.   21.92 22.83 24.17 24.98 25.04 24.53 21.96]
+ [21.27 20.43 19.2  19.51 19.96 20.92 21.85 24.19 25.95 26.68 27.1  26.04]
+ [24.57 23.34 22.02 21.38 21.67 22.3  23.45 25.27 25.92 25.41 24.18 23.07]
+ [21.84 20.81 20.27 19.62 20.64 21.07 22.32 23.77 25.64 25.75 25.23 23.89]
+ [22.18 20.99 19.73 19.18 19.41 20.21 21.3  23.17 24.79 25.17 24.09 22.54]
+ [21.6  21.13 20.73 20.86 21.16 21.35 22.99 24.76 25.55 26.88 26.42 25.97]
+ [24.3  22.24 21.01 20.68 21.8  22.33 23.45 24.92 25.63 25.57 24.48 23.13]
+ [21.33 19.7  19.3  19.49 20.29 20.32 21.79 23.32 24.66 24.91 25.1  22.96]
+ [21.86 21.26 19.86 19.79 20.07 21.13 21.96 24.62 26.81 27.31 26.35 25.51]
+ [24.86 24.07 23.27 22.12 22.56 23.4  24.69 26.33 26.5  26.15 24.52 23.47]
+ [21.51 20.75 19.47 19.24 19.68 20.71 21.61 23.32 24.92 26.04 25.29 24.42]
+ [22.68 21.6  20.47 19.91 20.02 20.95 21.41 23.67 24.9  26.17 25.44 23.36]
+ [21.71 20.98 20.05 18.8  19.13 19.61 20.94 23.73 25.63 26.21 25.78 25.33]
+ [24.4  23.46 22.19 21.67 21.52 22.   23.69 25.31 25.97 26.35 25.25 23.95]
+ [22.82 21.75 20.28 19.85 20.98 21.65 22.49 24.33 25.99 25.54 25.03 23.47]
+ [22.09 21.11 20.03 19.86 20.35 21.99 23.3  24.77 25.7  26.26 25.39 24.13]
+ [23.29 22.18 21.2  21.3  21.61 22.2  23.25 24.77 25.77 26.61 25.8  24.54]
+ [23.27 21.52 20.77 20.66 20.36 21.56 22.54 23.48 25.21 26.31 25.03 24.06]
+ [22.75 21.38 20.52 19.93 20.55 21.41 23.   24.29 25.49 25.21 24.5  23.97]
+ [22.89 22.47 21.75 21.8  22.94 24.59 26.13 27.42 28.09 28.68 28.56 28.19]
+ [27.44 25.95 23.78 22.24 21.86 21.9  23.01 24.18 25.18 26.   25.16 23.23]
+ [21.96 21.24 20.17 20.37 20.52 21.5  22.58 23.59 24.87 25.74 24.25 22.29]
+ [21.75 20.44 19.29 19.44 19.9  20.69 22.4  24.61 26.06 25.91 24.58 23.38]
+ [21.98 21.12 20.97 20.44 21.07 22.03 23.   25.3  27.14 28.01 27.17 25.58]
+ [24.06 22.78 21.73 21.45 22.39 22.63 23.47 24.64 25.74 25.78 24.54 23.6 ]
+ [21.27 20.26 19.12 19.19 19.5  20.55 21.8  24.09 26.26 26.66 25.63 23.18]
+ [22.   21.12 20.32 19.87 20.33 21.31 22.19 24.02 25.88 26.16 25.22 24.05]
+ [22.68 21.   20.25 20.13 20.28 20.84 22.45 23.86 25.97 26.51 24.99 24.37]
+ [23.05 22.05 21.08 20.75 21.13 22.18 23.43 24.83 26.68 27.76 27.68 26.31]
+ [23.82 21.95 20.55 20.06 20.82 21.49 22.48 24.43 26.49 27.17 26.44 25.15]
+ [23.76 22.06 21.05 20.83 20.99 21.64 22.75 24.32 25.79 25.43 24.32 23.22]
+ [22.43 21.21 19.7  20.16 21.53 22.41 23.61 25.33 26.43 26.12 24.47 23.1 ]
+ [22.45 21.23 20.01 20.17 20.15 21.2  22.02 23.84 25.71 26.09 23.85 22.89]
+ [21.56 20.02 19.53 19.24 19.95 20.26 21.61 23.67 25.74 26.95 26.64 26.71]
+ [26.27 25.59 24.8  24.4  24.58 25.63 26.92 28.22 28.98 29.15 28.61 27.69]
+ [25.18 23.43 21.77 20.87 21.16 21.43 22.56 23.73 25.64 26.62 24.3  23.46]
+ [21.83 20.44 19.75 19.23 20.05 20.51 21.72 23.86 25.71 26.19 25.84 24.1 ]
+ [22.25 20.59 20.1  19.94 20.37 20.6  22.22 23.88 25.91 27.44 26.69 23.77]
+ [21.74 20.88 19.9  19.39 19.52 20.49 21.96 23.64 26.06 27.53 26.53 24.8 ]
+ [22.67 21.01 19.94 19.89 21.16 22.25 23.44 24.38 25.81 25.97 24.44 22.49]
+ [21.58 20.75 20.14 20.   20.99 21.92 22.99 24.6  25.81 25.94 25.32 23.05]]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Create the mesh</span>
+<span class="n">n_nodes</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">mesher</span> <span class="o">=</span> <span class="n">ot</span><span class="o">.</span><span class="n">IntervalMesher</span><span class="p">([</span><span class="n">n_nodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">interval</span> <span class="o">=</span> <span class="n">ot</span><span class="o">.</span><span class="n">Interval</span><span class="p">([</span><span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">])</span>
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">mesher</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
+<span class="n">mesh</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+
+<span class="c1"># Create the ProcessSample from the data</span>
+<span class="n">n_fields</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">d_fields</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">sample</span> <span class="o">=</span> <span class="n">ot</span><span class="o">.</span><span class="n">ProcessSample</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">n_fields</span><span class="p">,</span> <span class="n">d_fields</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_fields</span><span class="p">):</span>
+    <span class="n">trajectory</span> <span class="o">=</span> <span class="n">ot</span><span class="o">.</span><span class="n">Sample</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">sample</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ot</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">trajectory</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[field 0:
+ 0 : [  0         21.7       ]
+ 1 : [  0.0909091 20.74      ]
+ 2 : [  0.181818  20.52      ]
+ 3 : [  0.272727  19.82      ]
+ 4 : [  0.363636  20.19      ]
+ 5 : [  0.454545  20.46      ]
+ 6 : [  0.545455  21.92      ]
+ 7 : [  0.636364  25.13      ]
+ 8 : [  0.727273  25.44      ]
+ 9 : [  0.818182  25.9       ]
+10 : [  0.909091  25.29      ]
+11 : [  1         24.9       ]
+field 1:
+ 0 : [  0         24.56      ]
+ 1 : [  0.0909091 24.04      ]
+ 2 : [  0.181818  22.43      ]
+ 3 : [  0.272727  21.52      ]
+ 4 : [  0.363636  22.2       ]
+ 5 : [  0.454545  22.9       ]
+ 6 : [  0.545455  23.01      ]
+ 7 : [  0.636364  24.47      ]
+ 8 : [  0.727273  26.42      ]
+ 9 : [  0.818182  26.51      ]
+10 : [  0.909091  24.54      ]
+11 : [  1         23.69      ]
+field 2:
+ 0 : [  0         22.35      ]
+ 1 : [  0.0909091 20.74      ]
+ 2 : [  0.181818  19.95      ]
+ 3 : [  0.272727  20.12      ]
+ 4 : [  0.363636  20.45      ]
+ 5 : [  0.454545  20.72      ]
+ 6 : [  0.545455  22.53      ]
+ 7 : [  0.636364  24.19      ]
+ 8 : [  0.727273  26.33      ]
+ 9 : [  0.818182  27.21      ]
+10 : [  0.909091  26.85      ]
+11 : [  1         25.24      ]
+field 3:
+ 0 : [  0         23.74      ]
+ 1 : [  0.0909091 22.45      ]
+ 2 : [  0.181818  21.68      ]
+ 3 : [  0.272727  21.49      ]
+ 4 : [  0.363636  21.08      ]
+ 5 : [  0.454545  22.07      ]
+ 6 : [  0.545455  22.47      ]
+ 7 : [  0.636364  23.06      ]
+ 8 : [  0.727273  25.22      ]
+ 9 : [  0.818182  25.83      ]
+10 : [  0.909091  23.05      ]
+11 : [  1         21.79      ]
+field 4:
+ 0 : [  0         21.02      ]
+ 1 : [  0.0909091 19.89      ]
+ 2 : [  0.181818  19.78      ]
+ 3 : [  0.272727  19.23      ]
+ 4 : [  0.363636  19.2       ]
+ 5 : [  0.454545  20.47      ]
+ 6 : [  0.545455  21.25      ]
+ 7 : [  0.636364  23.7       ]
+ 8 : [  0.727273  24.64      ]
+ 9 : [  0.818182  25.51      ]
+10 : [  0.909091  24.34      ]
+11 : [  1         22.53      ]
+field 5:
+ 0 : [  0         21.12      ]
+ 1 : [  0.0909091 20.56      ]
+ 2 : [  0.181818  19.75      ]
+ 3 : [  0.272727  19.47      ]
+ 4 : [  0.363636  19.35      ]
+ 5 : [  0.454545  20         ]
+ 6 : [  0.545455  21.1       ]
+ 7 : [  0.636364  23.67      ]
+ 8 : [  0.727273  24.78      ]
+ 9 : [  0.818182  25.76      ]
+10 : [  0.909091  25.06      ]
+11 : [  1         23.3       ]
+field 6:
+ 0 : [  0         22.29      ]
+ 1 : [  0.0909091 21.62      ]
+ 2 : [  0.181818  20.66      ]
+ 3 : [  0.272727  19.98      ]
+ 4 : [  0.363636  19.84      ]
+ 5 : [  0.454545  20.86      ]
+ 6 : [  0.545455  21.6       ]
+ 7 : [  0.636364  23.25      ]
+ 8 : [  0.727273  26.32      ]
+ 9 : [  0.818182  27.47      ]
+10 : [  0.909091  26.86      ]
+11 : [  1         26.29      ]
+field 7:
+ 0 : [  0         24.92      ]
+ 1 : [  0.0909091 23.82      ]
+ 2 : [  0.181818  22.33      ]
+ 3 : [  0.272727  21.88      ]
+ 4 : [  0.363636  21.76      ]
+ 5 : [  0.454545  22.4       ]
+ 6 : [  0.545455  23.75      ]
+ 7 : [  0.636364  24.96      ]
+ 8 : [  0.727273  26.74      ]
+ 9 : [  0.818182  27.07      ]
+10 : [  0.909091  26.45      ]
+11 : [  1         25.08      ]
+field 8:
+ 0 : [  0         23.04      ]
+ 1 : [  0.0909091 22.38      ]
+ 2 : [  0.181818  20.56      ]
+ 3 : [  0.272727  20.72      ]
+ 4 : [  0.363636  20.96      ]
+ 5 : [  0.454545  21.64      ]
+ 6 : [  0.545455  22.47      ]
+ 7 : [  0.636364  24.09      ]
+ 8 : [  0.727273  25.68      ]
+ 9 : [  0.818182  27.07      ]
+10 : [  0.909091  25.89      ]
+11 : [  1         24.26      ]
+field 9:
+ 0 : [  0         22.63      ]
+ 1 : [  0.0909091 21.45      ]
+ 2 : [  0.181818  20.34      ]
+ 3 : [  0.272727  20.41      ]
+ 4 : [  0.363636  20.91      ]
+ 5 : [  0.454545  21.99      ]
+ 6 : [  0.545455  22.69      ]
+ 7 : [  0.636364  24.57      ]
+ 8 : [  0.727273  25.72      ]
+ 9 : [  0.818182  26.15      ]
+10 : [  0.909091  24.72      ]
+11 : [  1         23.76      ]
+field 10:
+ 0 : [  0         22.15      ]
+ 1 : [  0.0909091 21.01      ]
+ 2 : [  0.181818  20.37      ]
+ 3 : [  0.272727  20.54      ]
+ 4 : [  0.363636  20.22      ]
+ 5 : [  0.454545  20.91      ]
+ 6 : [  0.545455  22.74      ]
+ 7 : [  0.636364  24.45      ]
+ 8 : [  0.727273  26.55      ]
+ 9 : [  0.818182  25.91      ]
+10 : [  0.909091  24.97      ]
+11 : [  1         23.71      ]
+field 11:
+ 0 : [  0         22.39      ]
+ 1 : [  0.0909091 20.55      ]
+ 2 : [  0.181818  19.96      ]
+ 3 : [  0.272727  19.75      ]
+ 4 : [  0.363636  20         ]
+ 5 : [  0.454545  21.07      ]
+ 6 : [  0.545455  22.06      ]
+ 7 : [  0.636364  24.11      ]
+ 8 : [  0.727273  25.55      ]
+ 9 : [  0.818182  24.63      ]
+10 : [  0.909091  23.57      ]
+11 : [  1         23.48      ]
+field 12:
+ 0 : [  0         21.85      ]
+ 1 : [  0.0909091 20.57      ]
+ 2 : [  0.181818  20.37      ]
+ 3 : [  0.272727  20.16      ]
+ 4 : [  0.363636  19.92      ]
+ 5 : [  0.454545  20.88      ]
+ 6 : [  0.545455  21.83      ]
+ 7 : [  0.636364  24.11      ]
+ 8 : [  0.727273  25.36      ]
+ 9 : [  0.818182  25.88      ]
+10 : [  0.909091  24.54      ]
+11 : [  1         24.17      ]
+field 13:
+ 0 : [  0         22.6       ]
+ 1 : [  0.0909091 22.01      ]
+ 2 : [  0.181818  21.45      ]
+ 3 : [  0.272727  21.15      ]
+ 4 : [  0.363636  21         ]
+ 5 : [  0.454545  21.92      ]
+ 6 : [  0.545455  22.83      ]
+ 7 : [  0.636364  24.17      ]
+ 8 : [  0.727273  24.98      ]
+ 9 : [  0.818182  25.04      ]
+10 : [  0.909091  24.53      ]
+11 : [  1         21.96      ]
+field 14:
+ 0 : [  0         21.27      ]
+ 1 : [  0.0909091 20.43      ]
+ 2 : [  0.181818  19.2       ]
+ 3 : [  0.272727  19.51      ]
+ 4 : [  0.363636  19.96      ]
+ 5 : [  0.454545  20.92      ]
+ 6 : [  0.545455  21.85      ]
+ 7 : [  0.636364  24.19      ]
+ 8 : [  0.727273  25.95      ]
+ 9 : [  0.818182  26.68      ]
+10 : [  0.909091  27.1       ]
+11 : [  1         26.04      ]
+field 15:
+ 0 : [  0         24.57      ]
+ 1 : [  0.0909091 23.34      ]
+ 2 : [  0.181818  22.02      ]
+ 3 : [  0.272727  21.38      ]
+ 4 : [  0.363636  21.67      ]
+ 5 : [  0.454545  22.3       ]
+ 6 : [  0.545455  23.45      ]
+ 7 : [  0.636364  25.27      ]
+ 8 : [  0.727273  25.92      ]
+ 9 : [  0.818182  25.41      ]
+10 : [  0.909091  24.18      ]
+11 : [  1         23.07      ]
+field 16:
+ 0 : [  0         21.84      ]
+ 1 : [  0.0909091 20.81      ]
+ 2 : [  0.181818  20.27      ]
+ 3 : [  0.272727  19.62      ]
+ 4 : [  0.363636  20.64      ]
+ 5 : [  0.454545  21.07      ]
+ 6 : [  0.545455  22.32      ]
+ 7 : [  0.636364  23.77      ]
+ 8 : [  0.727273  25.64      ]
+ 9 : [  0.818182  25.75      ]
+10 : [  0.909091  25.23      ]
+11 : [  1         23.89      ]
+field 17:
+ 0 : [  0         22.18      ]
+ 1 : [  0.0909091 20.99      ]
+ 2 : [  0.181818  19.73      ]
+ 3 : [  0.272727  19.18      ]
+ 4 : [  0.363636  19.41      ]
+ 5 : [  0.454545  20.21      ]
+ 6 : [  0.545455  21.3       ]
+ 7 : [  0.636364  23.17      ]
+ 8 : [  0.727273  24.79      ]
+ 9 : [  0.818182  25.17      ]
+10 : [  0.909091  24.09      ]
+11 : [  1         22.54      ]
+field 18:
+ 0 : [  0         21.6       ]
+ 1 : [  0.0909091 21.13      ]
+ 2 : [  0.181818  20.73      ]
+ 3 : [  0.272727  20.86      ]
+ 4 : [  0.363636  21.16      ]
+ 5 : [  0.454545  21.35      ]
+ 6 : [  0.545455  22.99      ]
+ 7 : [  0.636364  24.76      ]
+ 8 : [  0.727273  25.55      ]
+ 9 : [  0.818182  26.88      ]
+10 : [  0.909091  26.42      ]
+11 : [  1         25.97      ]
+field 19:
+ 0 : [  0         24.3       ]
+ 1 : [  0.0909091 22.24      ]
+ 2 : [  0.181818  21.01      ]
+ 3 : [  0.272727  20.68      ]
+ 4 : [  0.363636  21.8       ]
+ 5 : [  0.454545  22.33      ]
+ 6 : [  0.545455  23.45      ]
+ 7 : [  0.636364  24.92      ]
+ 8 : [  0.727273  25.63      ]
+ 9 : [  0.818182  25.57      ]
+10 : [  0.909091  24.48      ]
+11 : [  1         23.13      ]
+field 20:
+ 0 : [  0         21.33      ]
+ 1 : [  0.0909091 19.7       ]
+ 2 : [  0.181818  19.3       ]
+ 3 : [  0.272727  19.49      ]
+ 4 : [  0.363636  20.29      ]
+ 5 : [  0.454545  20.32      ]
+ 6 : [  0.545455  21.79      ]
+ 7 : [  0.636364  23.32      ]
+ 8 : [  0.727273  24.66      ]
+ 9 : [  0.818182  24.91      ]
+10 : [  0.909091  25.1       ]
+11 : [  1         22.96      ]
+field 21:
+ 0 : [  0         21.86      ]
+ 1 : [  0.0909091 21.26      ]
+ 2 : [  0.181818  19.86      ]
+ 3 : [  0.272727  19.79      ]
+ 4 : [  0.363636  20.07      ]
+ 5 : [  0.454545  21.13      ]
+ 6 : [  0.545455  21.96      ]
+ 7 : [  0.636364  24.62      ]
+ 8 : [  0.727273  26.81      ]
+ 9 : [  0.818182  27.31      ]
+10 : [  0.909091  26.35      ]
+11 : [  1         25.51      ]
+field 22:
+ 0 : [  0         24.86      ]
+ 1 : [  0.0909091 24.07      ]
+ 2 : [  0.181818  23.27      ]
+ 3 : [  0.272727  22.12      ]
+ 4 : [  0.363636  22.56      ]
+ 5 : [  0.454545  23.4       ]
+ 6 : [  0.545455  24.69      ]
+ 7 : [  0.636364  26.33      ]
+ 8 : [  0.727273  26.5       ]
+ 9 : [  0.818182  26.15      ]
+10 : [  0.909091  24.52      ]
+11 : [  1         23.47      ]
+field 23:
+ 0 : [  0         21.51      ]
+ 1 : [  0.0909091 20.75      ]
+ 2 : [  0.181818  19.47      ]
+ 3 : [  0.272727  19.24      ]
+ 4 : [  0.363636  19.68      ]
+ 5 : [  0.454545  20.71      ]
+ 6 : [  0.545455  21.61      ]
+ 7 : [  0.636364  23.32      ]
+ 8 : [  0.727273  24.92      ]
+ 9 : [  0.818182  26.04      ]
+10 : [  0.909091  25.29      ]
+11 : [  1         24.42      ]
+field 24:
+ 0 : [  0         22.68      ]
+ 1 : [  0.0909091 21.6       ]
+ 2 : [  0.181818  20.47      ]
+ 3 : [  0.272727  19.91      ]
+ 4 : [  0.363636  20.02      ]
+ 5 : [  0.454545  20.95      ]
+ 6 : [  0.545455  21.41      ]
+ 7 : [  0.636364  23.67      ]
+ 8 : [  0.727273  24.9       ]
+ 9 : [  0.818182  26.17      ]
+10 : [  0.909091  25.44      ]
+11 : [  1         23.36      ]
+field 25:
+ 0 : [  0         21.71      ]
+ 1 : [  0.0909091 20.98      ]
+ 2 : [  0.181818  20.05      ]
+ 3 : [  0.272727  18.8       ]
+ 4 : [  0.363636  19.13      ]
+ 5 : [  0.454545  19.61      ]
+ 6 : [  0.545455  20.94      ]
+ 7 : [  0.636364  23.73      ]
+ 8 : [  0.727273  25.63      ]
+ 9 : [  0.818182  26.21      ]
+10 : [  0.909091  25.78      ]
+11 : [  1         25.33      ]
+field 26:
+ 0 : [  0         24.4       ]
+ 1 : [  0.0909091 23.46      ]
+ 2 : [  0.181818  22.19      ]
+ 3 : [  0.272727  21.67      ]
+ 4 : [  0.363636  21.52      ]
+ 5 : [  0.454545  22         ]
+ 6 : [  0.545455  23.69      ]
+ 7 : [  0.636364  25.31      ]
+ 8 : [  0.727273  25.97      ]
+ 9 : [  0.818182  26.35      ]
+10 : [  0.909091  25.25      ]
+11 : [  1         23.95      ]
+field 27:
+ 0 : [  0         22.82      ]
+ 1 : [  0.0909091 21.75      ]
+ 2 : [  0.181818  20.28      ]
+ 3 : [  0.272727  19.85      ]
+ 4 : [  0.363636  20.98      ]
+ 5 : [  0.454545  21.65      ]
+ 6 : [  0.545455  22.49      ]
+ 7 : [  0.636364  24.33      ]
+ 8 : [  0.727273  25.99      ]
+ 9 : [  0.818182  25.54      ]
+10 : [  0.909091  25.03      ]
+11 : [  1         23.47      ]
+field 28:
+ 0 : [  0         22.09      ]
+ 1 : [  0.0909091 21.11      ]
+ 2 : [  0.181818  20.03      ]
+ 3 : [  0.272727  19.86      ]
+ 4 : [  0.363636  20.35      ]
+ 5 : [  0.454545  21.99      ]
+ 6 : [  0.545455  23.3       ]
+ 7 : [  0.636364  24.77      ]
+ 8 : [  0.727273  25.7       ]
+ 9 : [  0.818182  26.26      ]
+10 : [  0.909091  25.39      ]
+11 : [  1         24.13      ]
+field 29:
+ 0 : [  0         23.29      ]
+ 1 : [  0.0909091 22.18      ]
+ 2 : [  0.181818  21.2       ]
+ 3 : [  0.272727  21.3       ]
+ 4 : [  0.363636  21.61      ]
+ 5 : [  0.454545  22.2       ]
+ 6 : [  0.545455  23.25      ]
+ 7 : [  0.636364  24.77      ]
+ 8 : [  0.727273  25.77      ]
+ 9 : [  0.818182  26.61      ]
+10 : [  0.909091  25.8       ]
+11 : [  1         24.54      ]
+field 30:
+ 0 : [  0         23.27      ]
+ 1 : [  0.0909091 21.52      ]
+ 2 : [  0.181818  20.77      ]
+ 3 : [  0.272727  20.66      ]
+ 4 : [  0.363636  20.36      ]
+ 5 : [  0.454545  21.56      ]
+ 6 : [  0.545455  22.54      ]
+ 7 : [  0.636364  23.48      ]
+ 8 : [  0.727273  25.21      ]
+ 9 : [  0.818182  26.31      ]
+10 : [  0.909091  25.03      ]
+11 : [  1         24.06      ]
+field 31:
+ 0 : [  0         22.75      ]
+ 1 : [  0.0909091 21.38      ]
+ 2 : [  0.181818  20.52      ]
+ 3 : [  0.272727  19.93      ]
+ 4 : [  0.363636  20.55      ]
+ 5 : [  0.454545  21.41      ]
+ 6 : [  0.545455  23         ]
+ 7 : [  0.636364  24.29      ]
+ 8 : [  0.727273  25.49      ]
+ 9 : [  0.818182  25.21      ]
+10 : [  0.909091  24.5       ]
+11 : [  1         23.97      ]
+field 32:
+ 0 : [  0         22.89      ]
+ 1 : [  0.0909091 22.47      ]
+ 2 : [  0.181818  21.75      ]
+ 3 : [  0.272727  21.8       ]
+ 4 : [  0.363636  22.94      ]
+ 5 : [  0.454545  24.59      ]
+ 6 : [  0.545455  26.13      ]
+ 7 : [  0.636364  27.42      ]
+ 8 : [  0.727273  28.09      ]
+ 9 : [  0.818182  28.68      ]
+10 : [  0.909091  28.56      ]
+11 : [  1         28.19      ]
+field 33:
+ 0 : [  0         27.44      ]
+ 1 : [  0.0909091 25.95      ]
+ 2 : [  0.181818  23.78      ]
+ 3 : [  0.272727  22.24      ]
+ 4 : [  0.363636  21.86      ]
+ 5 : [  0.454545  21.9       ]
+ 6 : [  0.545455  23.01      ]
+ 7 : [  0.636364  24.18      ]
+ 8 : [  0.727273  25.18      ]
+ 9 : [  0.818182  26         ]
+10 : [  0.909091  25.16      ]
+11 : [  1         23.23      ]
+field 34:
+ 0 : [  0         21.96      ]
+ 1 : [  0.0909091 21.24      ]
+ 2 : [  0.181818  20.17      ]
+ 3 : [  0.272727  20.37      ]
+ 4 : [  0.363636  20.52      ]
+ 5 : [  0.454545  21.5       ]
+ 6 : [  0.545455  22.58      ]
+ 7 : [  0.636364  23.59      ]
+ 8 : [  0.727273  24.87      ]
+ 9 : [  0.818182  25.74      ]
+10 : [  0.909091  24.25      ]
+11 : [  1         22.29      ]
+field 35:
+ 0 : [  0         21.75      ]
+ 1 : [  0.0909091 20.44      ]
+ 2 : [  0.181818  19.29      ]
+ 3 : [  0.272727  19.44      ]
+ 4 : [  0.363636  19.9       ]
+ 5 : [  0.454545  20.69      ]
+ 6 : [  0.545455  22.4       ]
+ 7 : [  0.636364  24.61      ]
+ 8 : [  0.727273  26.06      ]
+ 9 : [  0.818182  25.91      ]
+10 : [  0.909091  24.58      ]
+11 : [  1         23.38      ]
+field 36:
+ 0 : [  0         21.98      ]
+ 1 : [  0.0909091 21.12      ]
+ 2 : [  0.181818  20.97      ]
+ 3 : [  0.272727  20.44      ]
+ 4 : [  0.363636  21.07      ]
+ 5 : [  0.454545  22.03      ]
+ 6 : [  0.545455  23         ]
+ 7 : [  0.636364  25.3       ]
+ 8 : [  0.727273  27.14      ]
+ 9 : [  0.818182  28.01      ]
+10 : [  0.909091  27.17      ]
+11 : [  1         25.58      ]
+field 37:
+ 0 : [  0         24.06      ]
+ 1 : [  0.0909091 22.78      ]
+ 2 : [  0.181818  21.73      ]
+ 3 : [  0.272727  21.45      ]
+ 4 : [  0.363636  22.39      ]
+ 5 : [  0.454545  22.63      ]
+ 6 : [  0.545455  23.47      ]
+ 7 : [  0.636364  24.64      ]
+ 8 : [  0.727273  25.74      ]
+ 9 : [  0.818182  25.78      ]
+10 : [  0.909091  24.54      ]
+11 : [  1         23.6       ]
+field 38:
+ 0 : [  0         21.27      ]
+ 1 : [  0.0909091 20.26      ]
+ 2 : [  0.181818  19.12      ]
+ 3 : [  0.272727  19.19      ]
+ 4 : [  0.363636  19.5       ]
+ 5 : [  0.454545  20.55      ]
+ 6 : [  0.545455  21.8       ]
+ 7 : [  0.636364  24.09      ]
+ 8 : [  0.727273  26.26      ]
+ 9 : [  0.818182  26.66      ]
+10 : [  0.909091  25.63      ]
+11 : [  1         23.18      ]
+field 39:
+ 0 : [  0         22         ]
+ 1 : [  0.0909091 21.12      ]
+ 2 : [  0.181818  20.32      ]
+ 3 : [  0.272727  19.87      ]
+ 4 : [  0.363636  20.33      ]
+ 5 : [  0.454545  21.31      ]
+ 6 : [  0.545455  22.19      ]
+ 7 : [  0.636364  24.02      ]
+ 8 : [  0.727273  25.88      ]
+ 9 : [  0.818182  26.16      ]
+10 : [  0.909091  25.22      ]
+11 : [  1         24.05      ]
+field 40:
+ 0 : [  0         22.68      ]
+ 1 : [  0.0909091 21         ]
+ 2 : [  0.181818  20.25      ]
+ 3 : [  0.272727  20.13      ]
+ 4 : [  0.363636  20.28      ]
+ 5 : [  0.454545  20.84      ]
+ 6 : [  0.545455  22.45      ]
+ 7 : [  0.636364  23.86      ]
+ 8 : [  0.727273  25.97      ]
+ 9 : [  0.818182  26.51      ]
+10 : [  0.909091  24.99      ]
+11 : [  1         24.37      ]
+field 41:
+ 0 : [  0         23.05      ]
+ 1 : [  0.0909091 22.05      ]
+ 2 : [  0.181818  21.08      ]
+ 3 : [  0.272727  20.75      ]
+ 4 : [  0.363636  21.13      ]
+ 5 : [  0.454545  22.18      ]
+ 6 : [  0.545455  23.43      ]
+ 7 : [  0.636364  24.83      ]
+ 8 : [  0.727273  26.68      ]
+ 9 : [  0.818182  27.76      ]
+10 : [  0.909091  27.68      ]
+11 : [  1         26.31      ]
+field 42:
+ 0 : [  0         23.82      ]
+ 1 : [  0.0909091 21.95      ]
+ 2 : [  0.181818  20.55      ]
+ 3 : [  0.272727  20.06      ]
+ 4 : [  0.363636  20.82      ]
+ 5 : [  0.454545  21.49      ]
+ 6 : [  0.545455  22.48      ]
+ 7 : [  0.636364  24.43      ]
+ 8 : [  0.727273  26.49      ]
+ 9 : [  0.818182  27.17      ]
+10 : [  0.909091  26.44      ]
+11 : [  1         25.15      ]
+field 43:
+ 0 : [  0         23.76      ]
+ 1 : [  0.0909091 22.06      ]
+ 2 : [  0.181818  21.05      ]
+ 3 : [  0.272727  20.83      ]
+ 4 : [  0.363636  20.99      ]
+ 5 : [  0.454545  21.64      ]
+ 6 : [  0.545455  22.75      ]
+ 7 : [  0.636364  24.32      ]
+ 8 : [  0.727273  25.79      ]
+ 9 : [  0.818182  25.43      ]
+10 : [  0.909091  24.32      ]
+11 : [  1         23.22      ]
+field 44:
+ 0 : [  0         22.43      ]
+ 1 : [  0.0909091 21.21      ]
+ 2 : [  0.181818  19.7       ]
+ 3 : [  0.272727  20.16      ]
+ 4 : [  0.363636  21.53      ]
+ 5 : [  0.454545  22.41      ]
+ 6 : [  0.545455  23.61      ]
+ 7 : [  0.636364  25.33      ]
+ 8 : [  0.727273  26.43      ]
+ 9 : [  0.818182  26.12      ]
+10 : [  0.909091  24.47      ]
+11 : [  1         23.1       ]
+field 45:
+ 0 : [  0         22.45      ]
+ 1 : [  0.0909091 21.23      ]
+ 2 : [  0.181818  20.01      ]
+ 3 : [  0.272727  20.17      ]
+ 4 : [  0.363636  20.15      ]
+ 5 : [  0.454545  21.2       ]
+ 6 : [  0.545455  22.02      ]
+ 7 : [  0.636364  23.84      ]
+ 8 : [  0.727273  25.71      ]
+ 9 : [  0.818182  26.09      ]
+10 : [  0.909091  23.85      ]
+11 : [  1         22.89      ]
+field 46:
+ 0 : [  0         21.56      ]
+ 1 : [  0.0909091 20.02      ]
+ 2 : [  0.181818  19.53      ]
+ 3 : [  0.272727  19.24      ]
+ 4 : [  0.363636  19.95      ]
+ 5 : [  0.454545  20.26      ]
+ 6 : [  0.545455  21.61      ]
+ 7 : [  0.636364  23.67      ]
+ 8 : [  0.727273  25.74      ]
+ 9 : [  0.818182  26.95      ]
+10 : [  0.909091  26.64      ]
+11 : [  1         26.71      ]
+field 47:
+ 0 : [  0         26.27      ]
+ 1 : [  0.0909091 25.59      ]
+ 2 : [  0.181818  24.8       ]
+ 3 : [  0.272727  24.4       ]
+ 4 : [  0.363636  24.58      ]
+ 5 : [  0.454545  25.63      ]
+ 6 : [  0.545455  26.92      ]
+ 7 : [  0.636364  28.22      ]
+ 8 : [  0.727273  28.98      ]
+ 9 : [  0.818182  29.15      ]
+10 : [  0.909091  28.61      ]
+11 : [  1         27.69      ]
+field 48:
+ 0 : [  0         25.18      ]
+ 1 : [  0.0909091 23.43      ]
+ 2 : [  0.181818  21.77      ]
+ 3 : [  0.272727  20.87      ]
+ 4 : [  0.363636  21.16      ]
+ 5 : [  0.454545  21.43      ]
+ 6 : [  0.545455  22.56      ]
+ 7 : [  0.636364  23.73      ]
+ 8 : [  0.727273  25.64      ]
+ 9 : [  0.818182  26.62      ]
+10 : [  0.909091  24.3       ]
+11 : [  1         23.46      ]
+field 49:
+ 0 : [  0         21.83      ]
+ 1 : [  0.0909091 20.44      ]
+ 2 : [  0.181818  19.75      ]
+ 3 : [  0.272727  19.23      ]
+ 4 : [  0.363636  20.05      ]
+ 5 : [  0.454545  20.51      ]
+ 6 : [  0.545455  21.72      ]
+ 7 : [  0.636364  23.86      ]
+ 8 : [  0.727273  25.71      ]
+ 9 : [  0.818182  26.19      ]
+10 : [  0.909091  25.84      ]
+11 : [  1         24.1       ]
+field 50:
+ 0 : [  0         22.25      ]
+ 1 : [  0.0909091 20.59      ]
+ 2 : [  0.181818  20.1       ]
+ 3 : [  0.272727  19.94      ]
+ 4 : [  0.363636  20.37      ]
+ 5 : [  0.454545  20.6       ]
+ 6 : [  0.545455  22.22      ]
+ 7 : [  0.636364  23.88      ]
+ 8 : [  0.727273  25.91      ]
+ 9 : [  0.818182  27.44      ]
+10 : [  0.909091  26.69      ]
+11 : [  1         23.77      ]
+field 51:
+ 0 : [  0         21.74      ]
+ 1 : [  0.0909091 20.88      ]
+ 2 : [  0.181818  19.9       ]
+ 3 : [  0.272727  19.39      ]
+ 4 : [  0.363636  19.52      ]
+ 5 : [  0.454545  20.49      ]
+ 6 : [  0.545455  21.96      ]
+ 7 : [  0.636364  23.64      ]
+ 8 : [  0.727273  26.06      ]
+ 9 : [  0.818182  27.53      ]
+10 : [  0.909091  26.53      ]
+11 : [  1         24.8       ]
+field 52:
+ 0 : [  0         22.67      ]
+ 1 : [  0.0909091 21.01      ]
+ 2 : [  0.181818  19.94      ]
+ 3 : [  0.272727  19.89      ]
+ 4 : [  0.363636  21.16      ]
+ 5 : [  0.454545  22.25      ]
+ 6 : [  0.545455  23.44      ]
+ 7 : [  0.636364  24.38      ]
+ 8 : [  0.727273  25.81      ]
+ 9 : [  0.818182  25.97      ]
+10 : [  0.909091  24.44      ]
+11 : [  1         22.49      ]
+field 53:
+ 0 : [  0         21.58      ]
+ 1 : [  0.0909091 20.75      ]
+ 2 : [  0.181818  20.14      ]
+ 3 : [  0.272727  20         ]
+ 4 : [  0.363636  20.99      ]
+ 5 : [  0.454545  21.92      ]
+ 6 : [  0.545455  22.99      ]
+ 7 : [  0.636364  24.6       ]
+ 8 : [  0.727273  25.81      ]
+ 9 : [  0.818182  25.94      ]
+10 : [  0.909091  25.32      ]
+11 : [  1         23.05      ]]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Compute HDRPlot</span>
+<span class="n">hdr</span> <span class="o">=</span> <span class="n">ProcessHighDensityRegionAlgorithm</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+<span class="n">hdr</span><span class="o">.</span><span class="n">setContoursAlpha</span><span class="p">([</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="n">hdr</span><span class="o">.</span><span class="n">setOutlierAlpha</span><span class="p">(</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">hdr</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="n">hdr</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+<span class="n">hdr</span><span class="o">.</span><span class="n">dimensionReductionSummary</span><span class="p">()</span>
+
+<span class="c1"># Plot ACP</span>
+<span class="n">hdr</span><span class="o">.</span><span class="n">plotDimensionReduction</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Plot Density</span>
+<span class="n">hdr</span><span class="o">.</span><span class="n">plotDensity</span><span class="p">(</span><span class="n">plotData</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">plotOutliers</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Plot trajectories</span>
+<span class="n">hdr</span><span class="o">.</span><span class="n">plotTrajectories</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Plot outlier trajectories</span>
+<span class="n">inlierSample</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">plotOutlierTrajectories</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Outliers trajectories at alpha=</span><span class="si">%.4f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">hdr</span><span class="o">.</span><span class="n">densityPlot</span><span class="o">.</span><span class="n">outlierAlpha</span><span class="p">))</span>
+<span class="n">outlierIndices</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">computeOutlierIndices</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="n">outlierIndices</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Number of trajectories = 54
+Number of vertices = 12
+Number of components : 2
+Part of variance : 0.8657
+Explained variance ratio : [0.607596,0.258102]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_HDR_plot_4_1.png" src="../_images/examples_HDR_plot_4_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_HDR_plot_4_2.png" src="../_images/examples_HDR_plot_4_2.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_HDR_plot_4_3.png" src="../_images/examples_HDR_plot_4_3.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_HDR_plot_4_4.png" src="../_images/examples_HDR_plot_4_4.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Outliers trajectories at alpha=0.8000
+[ 3  7 22 32 33 41 47]
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="density_plot.html" title="Density Plot"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="examples.html" title="Examples of the API"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">othdrplot  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="examples.html" >Examples of the API</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019.
+      Last updated on Feb 18, 2019.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+    </div>
+  </body>
+</html>

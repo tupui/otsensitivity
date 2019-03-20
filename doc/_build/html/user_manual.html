@@ -1,0 +1,204 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Documentation of the API &#8212; othdrplot  documentation</title>
+    <link rel="stylesheet" href="_static/openturns.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="HighDensityRegionAlgorithm" href="_generated/othdrplot.HighDensityRegionAlgorithm.html" />
+    <link rel="prev" title="Welcome to othdrplot’s documentation!" href="index.html" />
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400,700'
+          rel='stylesheet' type='text/css' />
+ 
+
+  </head><body>
+<div class="pageheader">
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="#">Doc</a></li>
+    <li><a href="examples/examples.html">Examples</a></li>
+    <li><a href="https://github.com/openturns/othdrplot">Code</a></li>
+  </ul>
+  <a href="index.html">
+    <h1>
+      <img src="_static/logo-openturns-wo-bg.png" alt="" width=100px height=100px />
+      othdrplot
+    </h1>
+    <h2> A module to build Probability of Detection for Non Destructive Testing. </h2>
+  </a>
+</div>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="_generated/othdrplot.HighDensityRegionAlgorithm.html" title="HighDensityRegionAlgorithm"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to othdrplot’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">othdrplot  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Documentation of the API</a><ul>
+<li><a class="reference internal" href="#how-does-it-work">How does it work?</a><ul>
+<li><a class="reference internal" href="#othdrplot">otHDRPlot</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to othdrplot’s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="_generated/othdrplot.HighDensityRegionAlgorithm.html"
+                        title="next chapter">HighDensityRegionAlgorithm</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/user_manual.rst"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="documentation-of-the-api">
+<h1>Documentation of the API<a class="headerlink" href="#documentation-of-the-api" title="Permalink to this headline">¶</a></h1>
+<p>This is the user manual for the Python bindings to the othdrplot library.</p>
+<div class="section" id="how-does-it-work">
+<h2>How does it work?<a class="headerlink" href="#how-does-it-work" title="Permalink to this headline">¶</a></h2>
+<p>The dataset output is considered as a matrix where each line corresponds to a
+sample. This matrix is decomposed by Proper Orthogonal Decomposition (POD).
+The modes are ordered by decreasing importance in terms of contribution to the
+variance and only a finite number of modes are kept. In this reduced space,
+the functional dataset of large dimensions is conveniently represented by a
+limited number of scalars mapped onto most significant directions that maximizes
+the variance of the response variable. Within this reduced space, the
+classification of different patterns or the computation of metrics is eased.
+Hence, within this reduced space, the median sample corresponds to
+the HDR location. The distance to this point is computed in the modal space;
+the further a point is from the HDR, the less probable is the sample. The term
+<em>median</em>, which is used in the literature, is restrictive if there are multiple
+clusters of point in the reduced space.</p>
+<p>A multivariate Kernel Density Estimation (KDE) technique is used to estimate
+the PDF $hat{f}(mathbf{x_r})$ of this multivariate space. From this KDE, the
+HDR reads</p>
+<div class="math notranslate nohighlight">
+\[R_\alpha = {x_r: \hat{f}(\mathbf{x_r}) \geq f_{\alpha}},\]</div>
+<p>with <span class="math notranslate nohighlight">\(f_{\alpha}\)</span> such that <span class="math notranslate nohighlight">\(\int_{R_\alpha} \hat{f}(\mathbf{x_r}) d x_r = 1 - \alpha\)</span>.
+With this definition, the HDR corresponds to the region of highest PDF with a
+cumulative probability of <span class="math notranslate nohighlight">\(1-\alpha\)</span>. By construction a HDR develops
+around the maximum PDF <span class="math notranslate nohighlight">\(\max \{\hat{f}(\mathbf{x_r})\}\)</span> which identifies
+the most probable mode. Transposed using the inverse transform from the reduced
+space to the original space, this most probable mode corresponds to the
+“central curve”—also referred to as the median curve.</p>
+<p>Except if the response variable of the system of interest is chaotic under the
+perturbation of its input parameters, the POD is expected to drastically reduce
+the dimensionality of the problem. Furthermore, as the system’s response
+variable is also expected to oscillate around some modes, the points in the
+reduced space are likely to be relatively clustered around the modes. This
+mitigates the difficulty of the density estimation procedure.</p>
+<img alt="_images/npfda-elnino-scatter.png" src="_images/npfda-elnino-scatter.png" />
+<p>This figure illustrates the El Niño dataset in the reduced space when only two
+modes are retained ensuring that at least 80% of the response variable variance
+is conserved. This visualization exhibit a cluster of points. It indicate that
+a lot of curve lead to common components. Following a KDE is computed.</p>
+<img alt="_images/npfda-elnino-DensityPlot.png" src="_images/npfda-elnino-DensityPlot.png" />
+<p>Each realization can be characterized with respect to the HDR metric.
+In the modal space, each dot represents a realization within the dataset and
+the contouring represents the 50% and 80% quantiles.</p>
+<p>In the response variable physical space, the outliers are <em>red curves</em>,
+the <em>thick black curve</em> is the median and the <em>green areas</em> represent 50% and
+80% quantiles envelopes. It should be noted that additional realizations with
+chosen characteristics on the outputs could be drawn by sampling the input for
+specific HDR criteria.</p>
+<img alt="_images/npfda-elnino-OutlierTrajectoryPlot.png" src="_images/npfda-elnino-OutlierTrajectoryPlot.png" />
+<div class="section" id="othdrplot">
+<h3>otHDRPlot<a class="headerlink" href="#othdrplot" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="_generated/othdrplot.HighDensityRegionAlgorithm.html#othdrplot.HighDensityRegionAlgorithm" title="othdrplot.HighDensityRegionAlgorithm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HighDensityRegionAlgorithm</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="_generated/othdrplot.ProcessHighDensityRegionAlgorithm.html#othdrplot.ProcessHighDensityRegionAlgorithm" title="othdrplot.ProcessHighDensityRegionAlgorithm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessHighDensityRegionAlgorithm</span></code></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="_generated/othdrplot.HighDensityRegionAlgorithm.html" title="HighDensityRegionAlgorithm"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to othdrplot’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">othdrplot  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019.
+      Last updated on Feb 18, 2019.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.4.
+    </div>
+  </body>
+</html>
