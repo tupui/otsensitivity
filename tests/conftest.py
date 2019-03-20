@@ -4,6 +4,12 @@ import openturns as ot
 
 
 @pytest.fixture(scope='session')
+def tmp(tmpdir_factory):
+    """Create a common temp directory."""
+    return str(tmpdir_factory.mktemp('tmp_test'))
+
+
+@pytest.fixture(scope='session')
 def ishigami():
     # Create the model and input distribution
     formula = ['sin(X1) + 7 * sin(X2)^2 + 0.1 * X3^4 * sin(X1)']

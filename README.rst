@@ -25,13 +25,20 @@ Example:
     s, st = sobol_saltelli(model, 1000, 3, [[-np.pi, -np.pi, -np.pi],
                                             [np.pi, np.pi, np.pi]])
     
-    
+    plot_indices([s, st])
     
 
 The output is the following figure: 
 
-.. image::  doc/images/npfda-elnino-OutlierTrajectoryPlot.png
+.. image::  doc/images/ishigami_indices.png
 
+It is possible to use a polar coordinate system: 
+
+.. code-block:: python
+
+    plot_indices([s, st], polar=True)
+
+.. image::  doc/images/ishigami_indices-polar.png
 
 How to install?
 ---------------

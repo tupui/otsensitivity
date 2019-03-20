@@ -1,6 +1,7 @@
 import pytest
 from otsensitivity import cosi
 
+
 def test_cosi(ishigami):
     model, sample, data = ishigami
 
