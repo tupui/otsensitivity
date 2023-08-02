@@ -61,6 +61,18 @@ This method use not only the variance but all the PDF in order to compute
 sensitivity information. Also, it does not require the use of any particlar
 sampling design.
 
+When we are interested in an event associated to a particular
+value of the output, we can plot the conditional distributions of the
+inputs given the output is in a known interval:
+
+.. code-block:: python
+
+    inputDistribution = ot.KernelSmoothing().build(inputSample)
+    grid = plot_event(inputSample, outputSample, indexOutput, lowerValue, upperValue, 
+                      inputDistribution)
+
+.. image::  doc/images/event_given_data.png
+
 How to install?
 ---------------
 
