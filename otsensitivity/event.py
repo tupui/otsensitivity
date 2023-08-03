@@ -1,9 +1,17 @@
+# Copyright (C) Michaël Baudin (2023)
 # -*- coding: utf-8 -*-
 """
-Dans ce script, on affiche la loi conditionnelle et inconditionnelle 
-d'un échantillon.
-Ce script permet d'identifier les variables d'entrée qui sont influentes sur un 
-évènement.
+Let Y=g(X) be the scalar output of 
+the model g with vector input X with dimension nx. 
+Let a < b be two real numbers. 
+We consider the event {a < Y < b}. 
+We want to compute the sensitivity of that event with respect to each input Xi. 
+
+This script computes the conditional distribution of the input Xi given that the output Y is
+in the interval [a, b], for i=1,...,nx. 
+Compare that conditional distribution with 
+the unconditional distribution of Xi: 
+if there is no difference, then the input Xi is not influential for that event.
 """
 
 import openturns as ot
