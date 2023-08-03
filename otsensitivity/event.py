@@ -35,14 +35,11 @@ def computeConditionnedSample(
     Parameters
     ----------
     sample: ot.Sample(size, dimension) 
-        The sample. 
-    
+        The sample.
     lowerBound: float
         The lower bound. 
-
     upperBound: float
         The upper bound.
-
     columnIndex: int
         The index of a column of the sample. 
         Must be if the range 0, ..., dimension. 
@@ -52,6 +49,11 @@ def computeConditionnedSample(
     conditionedSample: ot.Sample(conditionedSize, dimension
         The filtered sample.
     """
+    dimension = sample.getDimension()
+    if columnIndex < 0:
+        raise ValueError(f"Negative column index {columnIndex}")
+    if columnIndex >= dimension:
+        raise ValueError(f"Column index {columnIndex} larger than dimension {dimension}.")
     sample = ot.Sample(sample)  # Copy the object
     criteriaSample = sample[:, columnIndex]
     criteriaArray = np.array(sampleCriteria.asPoint()) 
@@ -65,8 +67,25 @@ def computeConditionnedSample(
 
 
 def joint_input_output_sample(inputSample, outputSample):
+    """
+    Make a single sample from an (X, Y) pair. 
+
+    Parameters 
+    ----------
+    inputSample: ot.Sample(size, inputDimension)
+        The input sample X.
+    outputSample: ot.Sample(size, oututDimension)
+        The output sample Y.
+
+    Return
+    ------
+    jointXYSample: ot.Sample(size, dimension) 
+        The joint (X, Y) sample with dimension equal to inputDimension + outputDimension. 
+    """
     inputDimension = inputSample.getDimension()
     sampleSize = inputSample.getSize()
+    if outputSample.getSize() != sampleSize:
+        raise ValueError(f"The size of the input sample is {sampleSize} which does not match the size of the output sample {outputSample.getSize()}.") 
     outputDimension = outputSample.getDimension()
     # Joint the X and Y samples into a single one, so that the
     # sort can be done simultaneously on inputs and outputs
