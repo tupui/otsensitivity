@@ -28,19 +28,40 @@ def computeConditionnedSample(
     columnIndex,
 ):
     """
-    Return points from the -th component of the sample.
-    Selects the values according to the alpha-level quantile of
-    the criteriaComponent-th component of the sample.
+    Filter rows from the value of a column.
+
+    Return the rows of the sample such that one column is in a given interval.
+
+    Parameters
+    ----------
+    sample: ot.Sample(size, dimension) 
+        The sample. 
+    
+    lowerBound: float
+        The lower bound. 
+
+    upperBound: float
+        The upper bound.
+
+    columnIndex: int
+        The index of a column of the sample. 
+        Must be if the range 0, ..., dimension. 
+
+    Return
+    ------
+    conditionedSample: ot.Sample(conditionedSize, dimension
+        The filtered sample.
     """
     sample = ot.Sample(sample)  # Copy the object
-    sortedSampleCriteria = sample[:, columnIndex]
-    condition = (np.array(sortedSampleCriteria.asPoint()) >= lowerBound) & (
-        np.array(sortedSampleCriteria.asPoint()) < upperBound
+    criteriaSample = sample[:, columnIndex]
+    criteriaArray = np.array(sampleCriteria.asPoint()) 
+    condition = (criteriaArray >= lowerBound) & (criteriaArray
+        < upperBound
     )
     indices = np.where(condition)[0]
     rowIndices = [int(j) for j in indices]
-    conditionnedSortedSample = sample[rowIndices]
-    return conditionnedSortedSample
+    conditionnedSample = sample[rowIndices]
+    return conditionnedSample
 
 
 def joint_input_output_sample(inputSample, outputSample):
