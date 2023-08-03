@@ -25,15 +25,15 @@ def computeConditionnedSample(
     sample,
     lowerBound,
     upperBound,
-    criteriaComponent,
+    columnIndex,
 ):
     """
-    Return values from the selectedComponent-th component of the sample.
+    Return points from the -th component of the sample.
     Selects the values according to the alpha-level quantile of
     the criteriaComponent-th component of the sample.
     """
     sample = ot.Sample(sample)  # Copy the object
-    sortedSampleCriteria = sample[:, criteriaComponent]
+    sortedSampleCriteria = sample[:, columnIndex]
     condition = (np.array(sortedSampleCriteria.asPoint()) >= lowerBound) & (
         np.array(sortedSampleCriteria.asPoint()) < upperBound
     )
