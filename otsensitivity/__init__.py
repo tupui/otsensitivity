@@ -3,7 +3,7 @@ from .sobol import sobol_saltelli
 from .cosi import cosi
 from .visualization import plot_indices, pairplot
 from .moments import cusunoro, ecdf, moment_independent
-from .event import (
+from .conditioning import (
     plotConditionOutputBounds,
     plotConditionOutputQuantile,
     plotConditionInputAll,

@@ -382,15 +382,47 @@ def plotConditionOutputQuantile(
     return grid
 
 
-def computeConditionalSensitivity(
+def computeOutputConditionalDistribution(
     inputSample, outputSample, inputMarginalIndex, boundsList, verbose=False
 ):
+    """
+    Condition the input and compute the conditional distribution of the output.
+
+    Parameters
+    ----------
+    inputSample: ot.Sample(size, inputDimension)
+        The input sample X.
+    outputSample: ot.Sample(size, outputDimension)
+        The output sample Y.
+    inputMarginalIndex: int
+        The index of an input.
+    outputBoundList: list(numberOfBounds)
+        The list of output bounds.
+
+    Return
+    ------
+    outputDistributionList: list(numberOfSplit)
+        The number of splits is equal to numberOfBounds - 1.
+        Each distribution is the conditional distribution of the
+        output given that the input is in the specified interval defined
+        by its bounds.
+    """
     if outputSample.getDimension() != 1:
         raise ValueError(
             f"Output dimension is equal to {outputSample.getDimension()}" "instead of 1"
         )
-    sampleSize = inputSample.getSize()
     inputDimension = inputSample.getDimension()
+    if inputMarginalIndex < 0 or inputMarginalIndex >= inputDimension:
+        raise ValueError(
+            f"Unknown input marginal index {inputMarginalIndex}. "
+            f"Must be in the [0, {inputDimension}] interval."
+        )
+    sampleSize = inputSample.getSize()
+    if outputSample.getSize() != sampleSize:
+        raise ValueError(
+            f"The input sample has size {sampleSize} "
+            f"but the output sample has size {outputSample.getSize()}."
+        )
     outputDimension = outputSample.getDimension()
     # Joint the X and Y samples into a single one, so that the
     # sort can be done simultaneously on inputs and outputs
@@ -409,7 +441,7 @@ def computeConditionalSensitivity(
     if verbose:
         print("| i / k | lower bound | upper bound | size |")
         print("|-------|-------------|-------------|------|")
-    distributionList = []
+    outputDistributionList = []
     numberOfSplit = len(boundsList) - 1
     for i in range(numberOfSplit):
         lowerBound = boundsList[i]
@@ -429,14 +461,39 @@ def computeConditionalSensitivity(
             )
         outputMarginalSample = conditionnedSample.getMarginal(outputMarginalIndex)
         kde = ot.KernelSmoothing().build(outputMarginalSample)
-        distributionList.append(kde)
+        outputDistributionList.append(kde)
 
-    return distributionList
+    return outputDistributionList
 
 
 def plotConditionInputAll(
     inputSample, outputSample, inputMarginalIndex, numberOfSplit=5, verbose=False
 ):
+    """
+    Condition on input with sequence of quantile levels and see all plots of the conditional output.
+
+    Parameters
+    ----------
+    inputSample: ot.Sample(size, inputDimension)
+        The input sample X.
+    outputSample: ot.Sample(size, outputDimension)
+        The output sample Y.
+    inputMarginalIndex: int
+        The index of an input.
+    outputBoundList: list(numberOfBounds)
+        The list of output bounds.
+
+    Return
+    ------
+    grid: ot.GridLayout(outputDimension, numberOfSplit)
+        The number of splits defines partition of the [0, 1] interval into
+        sub-intervals of equal lengths.
+        Each sub-interval defines a interval of quantile  of the inputMarginalIndex-th input.
+        Each plot represents the unconditional and conditional distribution
+        of the ouput with respect to the inputMarginalIndex-th input.
+        The conditional distribution of the output is defined as Y | Xi in [a, b]
+        where a and b are computed from a list of quantiles of the input.
+    """
     inputDimension = inputSample.getDimension()
     outputDimension = outputSample.getDimension()
     sampleSize = inputSample.getSize()
@@ -452,10 +509,16 @@ def plotConditionInputAll(
         outputMarginalSample = outputSample.getMarginal(outputIndex)
         # Unconditional output distribution
         outputDistribution = ot.KernelSmoothing().build(outputMarginalSample)
-        unconditionalPDFCurve = outputDistribution.drawPDF().getDrawable(0)
+        unconditionalPDFPlot = outputDistribution.drawPDF()
+        unconditionalPDFCurve = unconditionalPDFPlot.getDrawable(0)
         unconditionalPDFCurve.setLineStyle("dashed")
         unconditionalPDFCurve.setLegend("Unconditional")
-
+        # Comput common bounding box
+        unconditionalPDFBoundingBox = unconditionalPDFPlot.getBoundingBox()
+        unconditionalLowerBound = unconditionalPDFBoundingBox.getLowerBound()
+        unconditionalUpperBound = unconditionalPDFBoundingBox.getUpperBound()
+        ymin = unconditionalUpperBound[0]
+        ymax = unconditionalUpperBound[1]
         #
         grid.setTitle(
             f"Sensitivity of {inputDescription[inputMarginalIndex]}, "
@@ -470,13 +533,21 @@ def plotConditionInputAll(
             boundsList.append(quantilePoint[inputMarginalIndex])
         #
         # Compute conditional distributions
-        distributionList = computeConditionalSensitivity(
+        distributionList = computeOutputConditionalDistribution(
             inputSample,
             outputMarginalSample,
             inputMarginalIndex,
             boundsList,
             verbose=verbose,
         )
+        # Search for maximum PDF
+        for i in range(numberOfSplit):
+            conditionalDistribution = distributionList[i]
+            curve = conditionalDistribution.drawPDF()
+            curveMax = curve.getBoundingBox().getUpperBound()[1]
+            ymax = max(ymax, curveMax)
+        # Set common interval
+        commonInterval = ot.Interval(unconditionalLowerBound, [ymin, ymax])
         for i in range(numberOfSplit):
             alphaLevelMin = alphaLevels[i]
             alphaLevelMax = alphaLevels[i + 1]
@@ -498,6 +569,7 @@ def plotConditionInputAll(
                 graph.setYTitle("")
             if i == numberOfSplit - 1:
                 graph.setLegendPosition("topright")
+            graph.setBoundingBox(commonInterval)
             grid.setGraph(outputIndex, i, graph)
     return grid
 
@@ -515,6 +587,25 @@ def createLighterPalette(baseColor, minimumValue, maximumValue, numberOfColors):
 
 
 def plotConditionInputQuantileSequence(inputSample, outputSample, numberOfSplit=5):
+    """
+    Condition on input with sequence of quantile levels and see the conditional output.
+
+    Parameters
+    ----------
+    inputSample: ot.Sample(size, inputDimension)
+        The input sample X.
+    outputSample: ot.Sample(size, outputDimension)
+        The output sample Y.
+    numberOfSplit: int
+        The number of cuts of the quantile levels.
+
+    Return
+    ------
+    grid: ot.GridLayout(outputDimension, inputDimension)
+        The outputIndex-th, inputIndex-th plot presents all the
+        conditional distributions of the output when the inputs has
+        a conditional distribution in a given interval.
+    """
     sampleSize = inputSample.getSize()
     inputDimension = inputSample.getDimension()
     outputDimension = outputSample.getDimension()
@@ -548,7 +639,7 @@ def plotConditionInputQuantileSequence(inputSample, outputSample, numberOfSplit=
                 quantilePoint = inputSample.computeQuantilePerComponent(alphaLevels[i])
                 boundsList.append(quantilePoint[inputMarginalIndex])
             # Compute conditional distributions
-            distributionList = computeConditionalSensitivity(
+            distributionList = computeOutputConditionalDistribution(
                 inputSample,
                 outputMarginalSample,
                 inputMarginalIndex,
