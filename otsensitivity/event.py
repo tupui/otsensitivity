@@ -15,34 +15,39 @@ if there is no difference, then the input Xi is not influential for that event.
 """
 
 import openturns as ot
-import openturns.viewer as otv
-from matplotlib import pylab as plt
 import numpy as np
 
 
 # %%
-def computeConditionnedSample(
+def filterSample(
     sample,
     lowerBound,
     upperBound,
     columnIndex,
 ):
     """
-    Filter rows from the value of a column.
+    Filter out the rows in the sample based on bounds on the output.
 
-    Return the rows of the sample such that one column is in a given interval.
+    Return a sample with a reduced sample size.
+    Each row of the filtered sample is such that the specified column
+    is in a given interval defined by its bounds:
+
+    a <= yj < b
+
+    where yj is the columnIndex-th column of the sample,
+    a is the lower bound and b is the upper bound.
 
     Parameters
     ----------
-    sample: ot.Sample(size, dimension) 
+    sample: ot.Sample(size, dimension)
         The sample.
     lowerBound: float
-        The lower bound. 
+        The lower bound.
     upperBound: float
         The upper bound.
     columnIndex: int
-        The index of a column of the sample. 
-        Must be if the range 0, ..., dimension. 
+        The index of a column of the sample.
+        Must be if the range 0, ..., dimension.
 
     Return
     ------
@@ -53,39 +58,47 @@ def computeConditionnedSample(
     if columnIndex < 0:
         raise ValueError(f"Negative column index {columnIndex}")
     if columnIndex >= dimension:
-        raise ValueError(f"Column index {columnIndex} larger than dimension {dimension}.")
+        raise ValueError(
+            f"Column index {columnIndex} larger than dimension {dimension}."
+        )
+    if upperBound < lowerBound:
+        raise ValueError(
+            f"The lower bound {lowerBound} is greater "
+            f"than the upper bound {upperBound}."
+        )
     sample = ot.Sample(sample)  # Copy the object
-    criteriaSample = sample[:, columnIndex]
-    criteriaArray = np.array(sampleCriteria.asPoint()) 
-    condition = (criteriaArray >= lowerBound) & (criteriaArray
-        < upperBound
-    )
+    selectionSample = sample[:, columnIndex]
+    selectionArray = np.array(selectionSample.asPoint())
+    condition = (selectionArray >= lowerBound) & (selectionArray < upperBound)
     indices = np.where(condition)[0]
     rowIndices = [int(j) for j in indices]
     conditionnedSample = sample[rowIndices]
     return conditionnedSample
 
 
-def joint_input_output_sample(inputSample, outputSample):
+def joinInputOutputSample(inputSample, outputSample):
     """
-    Make a single sample from an (X, Y) pair. 
+    Make a single sample from an (X, Y) pair.
 
-    Parameters 
+    Parameters
     ----------
     inputSample: ot.Sample(size, inputDimension)
         The input sample X.
-    outputSample: ot.Sample(size, oututDimension)
+    outputSample: ot.Sample(size, outputDimension)
         The output sample Y.
 
     Return
     ------
-    jointXYSample: ot.Sample(size, dimension) 
-        The joint (X, Y) sample with dimension equal to inputDimension + outputDimension. 
+    jointXYSample: ot.Sample(size, dimension)
+        The joint (X, Y) sample with dimension equal to inputDimension + outputDimension.
     """
     inputDimension = inputSample.getDimension()
     sampleSize = inputSample.getSize()
     if outputSample.getSize() != sampleSize:
-        raise ValueError(f"The size of the input sample is {sampleSize} which does not match the size of the output sample {outputSample.getSize()}.") 
+        raise ValueError(
+            f"The size of the input sample is {sampleSize} which "
+            f"does not match the size of the output sample {outputSample.getSize()}."
+        )
     outputDimension = outputSample.getDimension()
     # Joint the X and Y samples into a single one, so that the
     # sort can be done simultaneously on inputs and outputs
@@ -102,20 +115,34 @@ def joint_input_output_sample(inputSample, outputSample):
     return jointXYSample
 
 
-def filter_sample(inputSample, outputSample, indexOutput, lowerValue, upperValue):
+def filterInputOutputSample(
+    inputSample, outputSample, outputIndex, lowerBound, upperBound
+):
     """
-    Lit les données et filtre sur la valeur de la variable de sortie.
+    Filter out the rows in the input and output sample given bounds on the output.
+
+    Return a pair of (input, output) sample with a reduced sample size.
+    Each row of the filtered sample is such that the specified column
+    of the output is in a given interval defined by its bounds:
+
+    a <= yj < b
+
+    where yj is the outputIndex-th column of the output sample,
+    a is the lower bound and b is the upper bound.
 
     Parameters
     ----------
-    filename : TYPE
-        Le nom du fichier.
-    quantile_level : float, in [0, 1]
-        The quantile level of the output.
-    fast : TYPE, optional
-        Si vrai, utilise un sous-échantillon. The default is False.
-    verbose : TYPE, optional
-        Si vrai, affiche des messages intermédiaires. The default is False.
+    inputSample: ot.Sample(size, inputDimension)
+        The input sample X.
+    outputSample: ot.Sample(size, outputDimension)
+        The output sample Y.
+    outputIndex : int
+        The index of a column in the output sample.
+        Must be in the set {0, ..., outputDimension - 1}.
+    lowerBound : float
+        The lower bound for filtering.
+    upperBound : float
+        The upper bound for filtering.
 
     Returns
     -------
@@ -125,19 +152,23 @@ def filter_sample(inputSample, outputSample, indexOutput, lowerValue, upperValue
         DESCRIPTION.
 
     """
-    # 1. Joint X and Y samples
-    jointXYSample = joint_input_output_sample(inputSample, outputSample)
-    # 3. Condition
+    if upperBound < lowerBound:
+        raise ValueError(
+            f"The lower bound {lowerBound} is greater "
+            f"than the upper bound {upperBound}."
+        )
+    # 1. Join X and Y samples
+    jointXYSample = joinInputOutputSample(inputSample, outputSample)
+    # 2. Filter
     inputDimension = inputSample.getDimension()
-    jointXYIndex = inputDimension + indexOutput
-    print("jointXYIndex = ", jointXYIndex)
-    conditionedXYSample = computeConditionnedSample(
+    jointXYIndex = inputDimension + outputIndex
+    conditionedXYSample = filterSample(
         jointXYSample,
-        lowerValue,
-        upperValue,
+        lowerBound,
+        upperBound,
         jointXYIndex,
     )
-    # 4. Split into X and Y
+    # 3. Split into X and Y
     outputDimension = outputSample.getDimension()
     conditionedInputSample = conditionedXYSample[:, 0:inputDimension]
     conditionedOutputSample = conditionedXYSample[
@@ -147,67 +178,205 @@ def filter_sample(inputSample, outputSample, indexOutput, lowerValue, upperValue
     return conditionedInputSample, conditionedOutputSample
 
 
-def plot_event(
+def plot_event_from_bounds(
     inputSample,
     outputSample,
-    indexOutput,
-    lowerValue,
-    upperValue,
+    outputIndex,
+    lowerBound,
+    upperBound,
     inputDistribution,
-    verbose=False,
 ):
+    """
+    Plot the sensitivity of the output with respect to the input.
+
+    Let Y=g(X) be the scalar output of
+    the model g with vector input X with dimension nx.
+    Let a < b be two real numbers.
+    We consider the event {a <= Y < b}.
+    We want to compute the sensitivity of that event with respect to each input Xi.
+
+    This script computes the conditional distribution of the input Xi given that the output Y is
+    in the interval [a, b], for i=1,...,nx.
+    Compare that conditional distribution with
+    the unconditional distribution of Xi:
+    if there is no difference, then the input Xi is not influential for that event.
+
+    Parameters
+    ----------
+    inputSample: ot.Sample(size, inputDimension)
+        The input sample X.
+    outputSample: ot.Sample(size, outputDimension)
+        The output sample Y.
+    outputIndex : int
+        The index of a column in the output sample.
+        Must be in the set {0, ..., outputDimension - 1}.
+    lowerBound : float
+        The lower bound for filtering.
+    upperBound : float
+        The upper bound for filtering.
+    inputDistribution : ot.Distribution(inputDimension)
+        The distribution of the input sample.
+
+    Return
+    ------
+    grid: ot.GridLayout(1, 1 + inputDimension)
+        The grid of sensitivity plots.
+        The i-th plot presents the unconditional and conditional distribution of the
+        i-th input to the outputIndex-th output.
+        The last plot presents the unconditional and conditional distribution of the
+        outputIndex-th output.
+    """
+
+    def plot_unconditional_and_conditional_distribution(
+        unconditionalDistribution,
+        conditionalDistribution,
+        xTitle,
+        marginalOutputDescription,
+        lowerBound,
+        upperBound,
+    ):
+        graph = ot.Graph("", xTitle, "PDF", True)
+        # Plot unconditional distribution
+        curve = unconditionalDistribution.drawPDF().getDrawable(0)
+        curve.setLegend("Unconditional")
+        curve.setLineStyle("dashed")
+        graph.add(curve)
+        # Plot conditional distribution
+        curve = conditionalDistribution.drawPDF().getDrawable(0)
+        curve.setLegend(
+            f"{marginalOutputDescription} in [{lowerBound:.3e}, {upperBound:.3e}]"
+        )
+        graph.add(curve)
+        #
+        graph.setColors(ot.Drawable().BuildDefaultPalette(2))
+        return graph
+
     dimension_input = inputSample.getDimension()
     sample_size = inputSample.getSize()
-    if verbose:
-        print("Sample size = ", sample_size)
-        print("+ Min et max")
-        print("    Input maximum : ", inputSample.getMax())
-        print("    Input minimum : ", inputSample.getMin())
-        print("    Output maximum : ", outputSample.getMax())
-        print("    Output minimum : ", outputSample.getMin())
-        print("lower bound = ", lowerValue)
-        print("upper bound = ", upperValue)
-        print(inputSample[:10])
-        print(outputSample[:10])
-
-    conditionedInputSample, conditionedOutputSample = filter_sample(
-        inputSample, outputSample, indexOutput, lowerValue, upperValue
+    # Filter the input, output sample
+    conditionedInputSample, conditionedOutputSample = filterInputOutputSample(
+        inputSample, outputSample, outputIndex, lowerBound, upperBound
     )
     conditionedSampleSize = conditionedInputSample.getSize()
-
-    if verbose:
-        print("Conditioned Sample size = ", conditionedSampleSize)
-        print("+ Min et max")
-        print("    Input maximum : ", conditionedInputSample.getMax())
-        print("    Input minimum : ", conditionedInputSample.getMin())
-        print("    Output maximum : ", conditionedOutputSample.getMax())
-        print("    Output minimum : ", conditionedOutputSample.getMin())
-        print(conditionedInputSample[:10])
-        print(conditionedOutputSample[:10])
-
-    if verbose:
-        print("+ Visualise la distribution des entrées")
-    number_of_graphs = 2
     inputDescription = inputSample.getDescription()
-    grid = ot.GridLayout(1, dimension_input)
+    outputDescription = outputSample.getDescription()
+    marginalOutputDescription = outputDescription[outputIndex]
+    grid = ot.GridLayout(1, 1 + dimension_input)
     for i in range(dimension_input):
-        # Plot conditional distribution
-        marginal_input_distribution = ot.KernelSmoothing().build(
+        # Plot unconditional distribution
+        unconditionalDistribution = inputDistribution.getMarginal(i)
+        conditionalDistribution = ot.KernelSmoothing().build(
             conditionedInputSample[:, i]
         )
-        graph = marginal_input_distribution.drawPDF()
-        graph.setLegends([""])
-        graph.setXTitle(inputDescription[i])
+        xTitle = "%s" % inputDescription[i]
+        graph = plot_unconditional_and_conditional_distribution(
+            unconditionalDistribution,
+            conditionalDistribution,
+            xTitle,
+            marginalOutputDescription,
+            lowerBound,
+            upperBound,
+        )
         if i > 0:
             graph.setYTitle("")
-        # Plot unconditional distribution
-        marginal_distribution = inputDistribution.getMarginal(i)
-        curve = marginal_distribution.drawPDF()
-        curve.setLegends([""])
-        graph.add(curve)
-        graph.setColors(ot.Drawable().BuildDefaultPalette(number_of_graphs))
         grid.setGraph(0, i, graph)
-    grid.setTitle(
-        f"Unconditioned n={sample_size}, " f"conditioned n = {conditionedSampleSize}"
+    # Add the distribution of the output
+    # Plot unconditional output distribution
+    unconditionalDistribution = ot.KernelSmoothing().build(outputSample[:, outputIndex])
+    conditionalDistribution = ot.KernelSmoothing().build(
+        conditionedOutputSample[:, outputIndex]
     )
+    outputDescription = outputSample.getDescription()
+    xTitle = "%s" % outputDescription[outputIndex]
+    graph = plot_unconditional_and_conditional_distribution(
+        unconditionalDistribution,
+        conditionalDistribution,
+        xTitle,
+        marginalOutputDescription,
+        lowerBound,
+        upperBound,
+    )
+    #
+    graph.setYTitle("")
+    graph.setLegendPosition("topright")
+    grid.setGraph(0, dimension_input, graph)
+    #
+    grid.setTitle(
+        f"Unconditioned n={sample_size}, " f"Conditioned n = {conditionedSampleSize}"
+    )
+    return grid
+
+
+def plot_event_sensitivity_from_quantile(
+    inputSample, outputSample, quantileLevel, inputDistribution
+):
+    """
+    Plot sensitivity analysis from given quantile level.
+
+    In this sensitivity plot, we consider the sensitivity of the inputs
+    to the even that each output is exceeding a given threshold.
+    This threshold is computed from the given quantile level.
+    For example, if quantileLevel = 0.9, we are interested in the
+    sensitivity of the inputs to the event {q(0.9) <= Y}.
+    This amounts to repeated calls to plot_event_from_bounds() with
+    bounds computed from the given quantile level.
+
+    For all output marginal indices i from 0 to outputDimension - 1,
+    we compute marginal output bounds as follows:
+    - the minimum bound is the quantile of given level of the output marginal sample,
+    - the maximum bound is the sample maximum of the output marginal sample.
+    Then we call plot_event_from_bounds().
+    Finally, we gather each marginal plot into a single grid of plots.
+
+    Parameters
+    ----------
+    inputSample: ot.Sample(size, inputDimension)
+        The input sample X.
+    outputSample: ot.Sample(size, outputDimension)
+        The output sample Y.
+    quantileLevel: float, in [0, 1]
+        The quantile level.
+    inputDistribution : ot.Distribution(inputDimension)
+        The distribution of the input sample.
+
+    Return
+    ------
+    grid: ot.GridLayout(1, 1 + inputDimension)
+        The grid of sensitivity plots.
+        The i-th plot presents the unconditional and conditional distribution of the
+        i-th input to the outputIndex-th output.
+        The last plot presents the unconditional and conditional distribution of the
+        outputIndex-th output.
+    """
+    outputDimension = outputSample.getDimension()
+    inputDimension = inputSample.getDimension()
+    grid = ot.GridLayout(outputDimension, 1 + inputDimension)
+    outputDescription = outputSample.getDescription()
+    for indexOutput in range(outputDimension):
+        quantileLowerPoint = outputSample.computeQuantilePerComponent(quantileLevel)
+        lowerValue = quantileLowerPoint[indexOutput]
+        maxPoint = outputSample.getMax()
+        upperValue = maxPoint[indexOutput]
+        subGrid = plot_event_from_bounds(
+            inputSample,
+            outputSample,
+            indexOutput,
+            lowerValue,
+            upperValue,
+            inputDistribution,
+        )
+        # Merge sub-graphs into the main one.
+        for j in range(1 + inputDimension):
+            graph = subGrid.getGraph(0, j)
+            if j == inputDimension:
+                graph.setLegends(
+                    [
+                        "Unconditional",
+                        f"{outputDescription[indexOutput]} >= {lowerValue:.4e}",
+                    ]
+                )
+            grid.setGraph(indexOutput, j, graph)
+
+    lastSubGridTitle = subGrid.getTitle()
+    grid.setTitle(f"Quantile at level {quantileLevel}, {lastSubGridTitle}")
     return grid

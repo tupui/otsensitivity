@@ -3,7 +3,7 @@ from .sobol import sobol_saltelli
 from .cosi import cosi
 from .visualization import plot_indices, pairplot
 from .moments import cusunoro, ecdf, moment_independent
-from .event import plot_event
+from .event import plot_event_from_bounds, plot_event_sensitivity_from_quantile
 
 __all__ = [
     "sobol_saltelli",
@@ -13,6 +13,7 @@ __all__ = [
     "moment_independent",
     "plot_indices",
     "pairplot",
-    "plot_event",
+    "plot_event_from_bounds",
+    "plot_event_sensitivity_from_quantile",
 ]
 __version__ = "1.0"
