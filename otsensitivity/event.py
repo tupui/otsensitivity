@@ -178,7 +178,7 @@ def filterInputOutputSample(
     return conditionedInputSample, conditionedOutputSample
 
 
-def plot_event_from_bounds(
+def plotConditionOutputBounds(
     inputSample,
     outputSample,
     outputIndex,
@@ -307,7 +307,7 @@ def plot_event_from_bounds(
     return grid
 
 
-def plot_event_sensitivity_from_quantile(
+def plotConditionOutputQuantile(
     inputSample, outputSample, quantileLevel, inputDistribution
 ):
     """
@@ -357,7 +357,7 @@ def plot_event_sensitivity_from_quantile(
         lowerValue = quantileLowerPoint[indexOutput]
         maxPoint = outputSample.getMax()
         upperValue = maxPoint[indexOutput]
-        subGrid = plot_event_from_bounds(
+        subGrid = plotConditionOutputBounds(
             inputSample,
             outputSample,
             indexOutput,
@@ -379,4 +379,223 @@ def plot_event_sensitivity_from_quantile(
 
     lastSubGridTitle = subGrid.getTitle()
     grid.setTitle(f"Quantile at level {quantileLevel}, {lastSubGridTitle}")
+    return grid
+
+
+def computeConditionalSensitivity(
+    inputSample, outputSample, inputMarginalIndex, boundsList, verbose=False
+):
+    if outputSample.getDimension() != 1:
+        raise ValueError(
+            f"Output dimension is equal to {outputSample.getDimension()}" "instead of 1"
+        )
+    sampleSize = inputSample.getSize()
+    inputDimension = inputSample.getDimension()
+    outputDimension = outputSample.getDimension()
+    # Joint the X and Y samples into a single one, so that the
+    # sort can be done simultaneously on inputs and outputs
+    jointXYSample = ot.Sample(sampleSize, inputDimension + outputDimension)
+    jointXYSample[:, :inputDimension] = inputSample
+    jointXYSample[:, inputDimension : inputDimension + outputDimension] = outputSample
+    jointDescription = ot.Description(inputDimension + outputDimension)
+    inputDescription = inputSample.getDescription()
+    jointDescription[:inputDimension] = inputDescription
+    jointDescription[
+        inputDimension : inputDimension + outputDimension
+    ] = outputSample.getDescription()
+    jointXYSample.setDescription(jointDescription)
+    outputMarginalIndex = inputDimension
+    #
+    if verbose:
+        print("| i / k | lower bound | upper bound | size |")
+        print("|-------|-------------|-------------|------|")
+    distributionList = []
+    numberOfSplit = len(boundsList) - 1
+    for i in range(numberOfSplit):
+        lowerBound = boundsList[i]
+        upperBound = boundsList[1 + i]
+        conditionnedSample = filterSample(
+            jointXYSample,
+            lowerBound,
+            upperBound,
+            inputMarginalIndex,
+        )
+        if verbose:
+            print(
+                f"| {i} / {numberOfSplit} "
+                f"| {lowerBound:.2f} "
+                f"| {upperBound:.2f} "
+                f"| {conditionnedSample.getSize()} |"
+            )
+        outputMarginalSample = conditionnedSample.getMarginal(outputMarginalIndex)
+        kde = ot.KernelSmoothing().build(outputMarginalSample)
+        distributionList.append(kde)
+
+    return distributionList
+
+
+def plotConditionInputAll(
+    inputSample, outputSample, inputMarginalIndex, numberOfSplit=5, verbose=False
+):
+    inputDimension = inputSample.getDimension()
+    outputDimension = outputSample.getDimension()
+    sampleSize = inputSample.getSize()
+    inputDescription = inputSample.getDescription()
+    outputDescription = outputSample.getDescription()
+    if inputMarginalIndex < 0 or inputMarginalIndex > inputDimension:
+        raise ValueError(
+            f"Input marginal index {inputMarginalIndex} is not in "
+            f"[0, {inputDimension}]"
+        )
+    grid = ot.GridLayout(outputDimension, numberOfSplit)
+    for outputIndex in range(outputDimension):
+        outputMarginalSample = outputSample.getMarginal(outputIndex)
+        # Unconditional output distribution
+        outputDistribution = ot.KernelSmoothing().build(outputMarginalSample)
+        unconditionalPDFCurve = outputDistribution.drawPDF().getDrawable(0)
+        unconditionalPDFCurve.setLineStyle("dashed")
+        unconditionalPDFCurve.setLegend("Unconditional")
+
+        #
+        grid.setTitle(
+            f"Sensitivity of {inputDescription[inputMarginalIndex]}, "
+            f"n = {sampleSize}"
+        )
+        #
+        # Compute list of bounds
+        alphaLevels = np.linspace(0.0, 1.0, 1 + numberOfSplit)
+        boundsList = []
+        for i in range(1 + numberOfSplit):
+            quantilePoint = inputSample.computeQuantilePerComponent(alphaLevels[i])
+            boundsList.append(quantilePoint[inputMarginalIndex])
+        #
+        # Compute conditional distributions
+        distributionList = computeConditionalSensitivity(
+            inputSample,
+            outputMarginalSample,
+            inputMarginalIndex,
+            boundsList,
+            verbose=verbose,
+        )
+        for i in range(numberOfSplit):
+            alphaLevelMin = alphaLevels[i]
+            alphaLevelMax = alphaLevels[i + 1]
+            conditionalDistribution = distributionList[i]
+            graph = ot.Graph("", f"{outputDescription[outputIndex]}", "PDF", True)
+            graph.add(unconditionalPDFCurve)
+            curve = conditionalDistribution.drawPDF().getDrawable(0)
+            curve.setLegend("Conditional")
+            graph.add(curve)
+            #
+            if outputIndex == 0:
+                graph.setTitle(
+                    f"{inputDescription[inputMarginalIndex]} in [{alphaLevelMin:.2f}, {alphaLevelMax:.2f}]"
+                )
+            if i < numberOfSplit - 1:
+                graph.setLegends([""])
+            graph.setColors(ot.Drawable().BuildDefaultPalette(2))
+            if i > 0:
+                graph.setYTitle("")
+            if i == numberOfSplit - 1:
+                graph.setLegendPosition("topright")
+            grid.setGraph(outputIndex, i, graph)
+    return grid
+
+
+# %%
+def createLighterPalette(baseColor, minimumValue, maximumValue, numberOfColors):
+    r, g, b = baseColor
+    h, s, v = ot.Drawable.ConvertFromRGBIntoHSV(r, g, b)
+    valueArray = np.linspace(minimumValue, maximumValue, numberOfColors)
+    colorPalette = []
+    for i in range(numberOfColors):
+        hexColor = ot.Drawable.ConvertFromHSV(h, s, valueArray[i])
+        colorPalette.append(hexColor)
+    return colorPalette
+
+
+def plotConditionInputQuantileSequence(inputSample, outputSample, numberOfSplit=5):
+    sampleSize = inputSample.getSize()
+    inputDimension = inputSample.getDimension()
+    outputDimension = outputSample.getDimension()
+    inputDescription = inputSample.getDescription()
+    outputDescription = outputSample.getDescription()
+    #
+    # Join each plot into a single one.
+    baseColorPalette = ot.Drawable().BuildDefaultPalette(2)
+    unconditionalColor = baseColorPalette[0]
+    baseConditionalColor = baseColorPalette[1]
+    baseColor = ot.Drawable.ConvertToRGB(baseConditionalColor)
+    conditionalColorPalette = createLighterPalette(baseColor, 0.5, 1.0, numberOfSplit)
+    #
+    alphaLevels = np.linspace(0.0, 1.0, 1 + numberOfSplit)
+    grid = ot.GridLayout(outputDimension, inputDimension)
+    grid.setTitle(f"n = {sampleSize}, number of quantiles : {numberOfSplit}")
+    for outputIndex in range(outputDimension):
+        outputMarginalSample = outputSample.getMarginal(outputIndex)
+        # Unconditional output distribution
+        outputDistribution = ot.KernelSmoothing().build(outputMarginalSample)
+        unconditionalPDFPlot = outputDistribution.drawPDF()
+        unconditionalPDFCurve = unconditionalPDFPlot.getDrawable(0)
+        unconditionalPDFCurve.setLineStyle("dashed")
+        unconditionalPDFCurve.setColor(unconditionalColor)
+        # Compute the list of conditional distributions for all inputs
+        distributionAllInputs = []
+        for inputMarginalIndex in range(inputDimension):
+            # Compute list of bounds
+            boundsList = []
+            for i in range(1 + numberOfSplit):
+                quantilePoint = inputSample.computeQuantilePerComponent(alphaLevels[i])
+                boundsList.append(quantilePoint[inputMarginalIndex])
+            # Compute conditional distributions
+            distributionList = computeConditionalSensitivity(
+                inputSample,
+                outputMarginalSample,
+                inputMarginalIndex,
+                boundsList,
+                verbose=False,
+            )
+            distributionAllInputs.append(distributionList)
+        # Compute common bounding box
+        unconditionalPDFCurveBoundingBox = unconditionalPDFPlot.getBoundingBox()
+        unconditionalPDFLowerBound = unconditionalPDFCurveBoundingBox.getLowerBound()
+        unconditionalPDFUpperBound = unconditionalPDFCurveBoundingBox.getUpperBound()
+        ymin = unconditionalPDFUpperBound[0]
+        ymax = unconditionalPDFUpperBound[1]
+        for inputMarginalIndex in range(inputDimension):
+            distributionList = distributionAllInputs[inputMarginalIndex]
+            for i in range(numberOfSplit):
+                conditionalDistribution = distributionList[i]
+                curve = conditionalDistribution.drawPDF()
+                curveMaximumDensity = curve.getBoundingBox().getUpperBound()[1]
+                ymax = max(ymax, curveMaximumDensity)
+
+        # Set common interval
+        interval = ot.Interval(unconditionalPDFLowerBound, [ymin, ymax])
+        for inputMarginalIndex in range(inputDimension):
+            distributionList = distributionAllInputs[inputMarginalIndex]
+            graph = ot.Graph(
+                inputDescription[inputMarginalIndex],
+                outputDescription[outputIndex],
+                "PDF",
+                True,
+            )
+            if outputIndex > 0:
+                graph.setTitle("")
+            if inputMarginalIndex > 0:
+                graph.setYTitle("")
+            graph.add(unconditionalPDFCurve)
+            for i in range(numberOfSplit):
+                conditionalDistribution = distributionList[i]
+                curve = conditionalDistribution.drawPDF().getDrawable(0)
+                curve.setLegend(f"[{alphaLevels[i]:.1f}, {alphaLevels[1 + i]:.1f}]")
+                curve.setLineWidth(1.0)
+                curve.setColor(conditionalColorPalette[i])
+                graph.add(curve)
+            graph.setBoundingBox(interval)
+            if inputMarginalIndex < inputDimension - 1:
+                graph.setLegends([""])
+            else:
+                graph.setLegendPosition("topright")
+            grid.setGraph(outputIndex, inputMarginalIndex, graph)
     return grid
