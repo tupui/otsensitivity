@@ -232,7 +232,11 @@ class CheckEvent(unittest.TestCase):
         print("+ Distribution used for the input variables")
 
         grid = ots.plotConditionInputQuantileSequence(inputSample, outputSample)
-        view = otv.View(grid, figure_kw={"figsize": (8.0, 2.5)}, legend_kw={"bbox_to_anchor":(1.0, 1.0), "loc":"upper left"})
+        view = otv.View(
+            grid,
+            figure_kw={"figsize": (8.0, 2.5)},
+            legend_kw={"bbox_to_anchor": (1.0, 1.0), "loc": "upper left"},
+        )
         plt.subplots_adjust(wspace=0.5, top=0.8, bottom=0.2, right=0.8)
         view.save("../doc/images/condition_input_sequence.png")
 
@@ -251,8 +255,12 @@ class CheckEvent(unittest.TestCase):
             outputSample,
             inputMarginalIndex,
         )
-        view = otv.View(grid, figure_kw={"figsize": (11.0, 2.5)}, legend_kw={"bbox_to_anchor":(1.0, 1.0), "loc":"upper left"})
-        plt.subplots_adjust(wspace=0.8, top=0.8, bottom=0.2, right=0.8, left = 0.1)
+        view = otv.View(
+            grid,
+            figure_kw={"figsize": (11.0, 2.5)},
+            legend_kw={"bbox_to_anchor": (1.0, 1.0), "loc": "upper left"},
+        )
+        plt.subplots_adjust(wspace=0.8, top=0.8, bottom=0.2, right=0.8, left=0.1)
         view.save("../doc/images/condition_input_all.png")
 
 

@@ -12,6 +12,7 @@ from .conditioning import (
     joinInputOutputSample,
     filterInputOutputSample,
     plotConditionOutputAll,
+    plotConditionOutputQuantileSequence,
 )
 
 __all__ = [
@@ -30,5 +31,6 @@ __all__ = [
     "joinInputOutputSample",
     "filterInputOutputSample",
     "plotConditionOutputAll",
+    "plotConditionOutputQuantileSequence",
 ]
 __version__ = "1.0"

@@ -651,6 +651,7 @@ def createLighterPalette(baseColor, minimumValue, maximumValue, numberOfColors):
         The minimum value.
     maximumValue: float, in [0, 1]
         The maximum value.
+        We must have maximumValue >= minimumValue.
     numberOfColors: int
         The number of colors in the palette.
 
@@ -676,7 +677,9 @@ def createLighterPalette(baseColor, minimumValue, maximumValue, numberOfColors):
     return colorPalette
 
 
-def createLighterPalette(baseColor, minimumValue, maximumValue, numberOfColors):
+def createLighterPalette(
+    baseColor, minimumValue, maximumValue, numberOfColors, alpha=0.75
+):
     """ "
     Create a palette based on a base color and bounds of the value channel.
 
@@ -693,6 +696,7 @@ def createLighterPalette(baseColor, minimumValue, maximumValue, numberOfColors):
         The minimum value.
     maximumValue: float, in [0, 1]
         The maximum value.
+        We must have maximumValue >= minimumValue.
     numberOfColors: int
         The number of colors in the palette.
 
@@ -717,7 +721,7 @@ def createLighterPalette(baseColor, minimumValue, maximumValue, numberOfColors):
     valueArray = np.linspace(minimumValue, maximumValue, numberOfColors)
     colorPalette = []
     for i in range(numberOfColors):
-        hexColor = ot.Drawable.ConvertFromHSV(h, s, valueArray[i])
+        hexColor = ot.Drawable.ConvertFromHSVA(h, s, valueArray[i], alpha)
         colorPalette.append(hexColor)
     return colorPalette
 
@@ -740,6 +744,11 @@ def plotConditionInputQuantileSequence(
         The output sample Y.
     numberOfCuts: int, greater than 1
         The number of cuts of the quantile levels.
+    minimumValue: float, in [0, 1]
+        The minimum value.
+    maximumValue: float, in [0, 1]
+        The maximum value.
+        We must have maximumValue >= minimumValue.
 
     Return
     ------
@@ -787,7 +796,7 @@ def plotConditionInputQuantileSequence(
     )
     grid = ot.GridLayout(outputDimension, inputDimension)
     grid.setTitle(
-        f"PDF of Y | X in [a, b], n = {sampleSize}, number of quantiles : {numberOfCuts}"
+        f"PDF of Y | X, n = {sampleSize}, number of quantiles : {numberOfCuts}"
     )
     for outputIndex in range(outputDimension):
         distributionInputList = distributionOutputList[outputIndex]
@@ -798,6 +807,7 @@ def plotConditionInputQuantileSequence(
         unconditionalPDFCurve = unconditionalPDFPlot.getDrawable(0)
         unconditionalPDFCurve.setLineStyle("dashed")
         unconditionalPDFCurve.setColor(unconditionalColor)
+        unconditionalPDFCurve.setLegend("Unconditional")
         # Compute common bounding box
         unconditionalPDFCurveBoundingBox = unconditionalPDFPlot.getBoundingBox()
         unconditionalPDFLowerBound = unconditionalPDFCurveBoundingBox.getLowerBound()
@@ -817,13 +827,11 @@ def plotConditionInputQuantileSequence(
         for inputIndex in range(inputDimension):
             conditionalDistributionList = distributionInputList[inputIndex]
             graph = ot.Graph(
-                inputDescription[inputIndex],
-                outputDescription[outputIndex],
+                "",
+                f"{outputDescription[outputIndex]} | {inputDescription[inputIndex]}",
                 "PDF",
                 True,
             )
-            if outputIndex > 0:
-                graph.setTitle("")
             if inputIndex > 0:
                 graph.setYTitle("")
             graph.add(unconditionalPDFCurve)
@@ -863,13 +871,14 @@ def computeConditionOutputQuantileDistributions(
 
     Return
     ------
-    distributionOutputList: list(list(list(ot.Distribution())))
-        This is a list of outputDimension lists.
-        Each sub-list has inputDimension sub-sub-lists.
+    distributionInputList: list(list(list(ot.Distribution())))
+        This is a list of intputDimension lists.
+        Each sub-list has outputDimension sub-sub-lists.
         Each sub-sub-list has numberOfCuts distributions.
-        Each distribution is the distribution of the output conditionnaly
-        that the input is in a given range defined by its quantiles.
+        Each distribution is the distribution of the intput conditionnaly
+        that the output is in a given range defined by its quantiles.
     """
+    print(f"+ computeConditionOutputQuantileDistributions()")
     sampleSize = inputSample.getSize()
     if outputSample.getSize() != sampleSize:
         raise ValueError(
@@ -1027,4 +1036,131 @@ def plotConditionOutputAll(
                 graph.setLegendPosition("topright")
             graph.setBoundingBox(commonInterval)
             grid.setGraph(inputIndex, i, graph)
+    return grid
+
+
+def plotConditionOutputQuantileSequence(
+    inputSample,
+    outputSample,
+    numberOfCuts=5,
+    minimumColorValue=0.5,
+    maximumColorValue=1.0,
+):
+    """
+    Condition on output with sequence of quantile levels and see the conditional intput.
+
+    Parameters
+    ----------
+    inputSample: ot.Sample(size, inputDimension)
+        The input sample X.
+    outputSample: ot.Sample(size, outputDimension)
+        The output sample Y.
+    numberOfCuts: int, greater than 1
+        The number of cuts of the quantile levels.
+    minimumValue: float, in [0, 1]
+        The minimum value.
+    maximumValue: float, in [0, 1]
+        The maximum value.
+        We must have maximumValue >= minimumValue.
+
+    Return
+    ------
+    grid: ot.GridLayout(outputDimension, inputDimension)
+        The outputIndex-th, inputIndex-th plot presents all the
+        conditional distributions of the output when the inputs has
+        a conditional distribution in a given interval.
+    """
+    sampleSize = inputSample.getSize()
+    if outputSample.getSize() != sampleSize:
+        raise ValueError(
+            f"The size of the input sample is {sampleSize} which "
+            f"does not match the size of the output sample {outputSample.getSize()}."
+        )
+    if numberOfCuts < 1:
+        raise ValueError(
+            f"The number of splits must be larger than 1, but is equal to {numberOfCuts}."
+        )
+    if (
+        minimumColorValue > maximumColorValue
+        or minimumColorValue < 0.0
+        or maximumColorValue > 1.0
+    ):
+        raise ValueError(
+            f"The minimum color value is equal to {minimumColorValue} (must be >= 0.0) and "
+            f"the maximum color value is equal to {maximumColorValue} (must be <= 1.0), which is inconsistent."
+        )
+    inputDimension = inputSample.getDimension()
+    outputDimension = outputSample.getDimension()
+    inputDescription = inputSample.getDescription()
+    outputDescription = outputSample.getDescription()
+    #
+    # Join each plot into a single one.
+    baseColorPalette = ot.Drawable().BuildDefaultPalette(2)
+    unconditionalColor = baseColorPalette[0]
+    baseConditionalColor = baseColorPalette[1]
+    baseColor = ot.Drawable.ConvertToRGB(baseConditionalColor)
+    conditionalColorPalette = createLighterPalette(
+        baseColor, minimumColorValue, maximumColorValue, numberOfCuts
+    )
+    #
+    alphaLevels = np.linspace(0.0, 1.0, 1 + numberOfCuts)
+    distributionInputList = computeConditionOutputQuantileDistributions(
+        inputSample, outputSample, numberOfCuts
+    )
+    grid = ot.GridLayout(outputDimension, inputDimension)
+    grid.setTitle(
+        f"PDF of Y | X, n = {sampleSize}, number of quantiles : {numberOfCuts}"
+    )
+    for inputIndex in range(inputDimension):
+        distributionOutputList = distributionInputList[inputIndex]
+        inputMarginalSample = inputSample.getMarginal(inputIndex)
+        # Unconditional input distribution. TODO: replace this with the exact input distribution.
+        inputDistribution = ot.KernelSmoothing().build(inputMarginalSample)
+        unconditionalPDFPlot = inputDistribution.drawPDF()
+        unconditionalPDFCurve = unconditionalPDFPlot.getDrawable(0)
+        unconditionalPDFCurve.setLineStyle("dashed")
+        unconditionalPDFCurve.setColor(unconditionalColor)
+        unconditionalPDFCurve.setLegend("Unconditional")
+        # Compute common bounding box
+        unconditionalPDFCurveBoundingBox = unconditionalPDFPlot.getBoundingBox()
+        unconditionalPDFLowerBound = unconditionalPDFCurveBoundingBox.getLowerBound()
+        unconditionalPDFUpperBound = unconditionalPDFCurveBoundingBox.getUpperBound()
+        ymin = unconditionalPDFUpperBound[0]
+        ymax = unconditionalPDFUpperBound[1]
+        for outputIndex in range(outputDimension):
+            conditionalDistributionList = distributionOutputList[outputIndex]
+            for i in range(numberOfCuts):
+                conditionalDistribution = conditionalDistributionList[i]
+                curve = conditionalDistribution.drawPDF()
+                curveMaximumDensity = curve.getBoundingBox().getUpperBound()[1]
+                ymax = max(ymax, curveMaximumDensity)
+
+        # Set common interval
+        interval = ot.Interval(unconditionalPDFLowerBound, [ymin, ymax])
+        for outputIndex in range(outputDimension):
+            conditionalDistributionList = distributionOutputList[outputIndex]
+            graph = ot.Graph(
+                "",
+                f"{inputDescription[inputIndex]} | {outputDescription[outputIndex]}",
+                "PDF",
+                True,
+            )
+            if inputIndex > 0:
+                graph.setYTitle("")
+            graph.add(unconditionalPDFCurve)
+            for i in range(numberOfCuts):
+                conditionalDistribution = conditionalDistributionList[i]
+                curve = conditionalDistribution.drawPDF().getDrawable(0)
+                curve.setLegend(
+                    f"{outputDescription[outputIndex]} in [{alphaLevels[i]:.1f}, {alphaLevels[1 + i]:.1f}]"
+                )
+                curve.setLineWidth(1.0)
+                curve.setColor(conditionalColorPalette[i])
+                graph.add(curve)
+            graph.setBoundingBox(interval)
+            if inputIndex < inputDimension - 1:
+                graph.setLegends([""])
+            else:
+                graph.setLegendPosition("topright")
+            grid.setGraph(outputIndex, inputIndex, graph)
     return grid
