@@ -577,7 +577,7 @@ def plotConditionInputAll(
     )
     grid = ot.GridLayout(outputDimension, numberOfCuts)
     grid.setTitle(
-        f"Sensitivity of {inputDescription[inputIndex]}, " f"n = {sampleSize}"
+        f"PDF of Y | {inputDescription[inputIndex]} in [a, b], " f"n = {sampleSize}"
     )
     for outputIndex in range(outputDimension):
         distributionInputList = distributionOutputList[outputIndex]
@@ -786,7 +786,9 @@ def plotConditionInputQuantileSequence(
         inputSample, outputSample, numberOfCuts
     )
     grid = ot.GridLayout(outputDimension, inputDimension)
-    grid.setTitle(f"n = {sampleSize}, number of quantiles : {numberOfCuts}")
+    grid.setTitle(
+        f"PDF of Y | X in [a, b], n = {sampleSize}, number of quantiles : {numberOfCuts}"
+    )
     for outputIndex in range(outputDimension):
         distributionInputList = distributionOutputList[outputIndex]
         outputMarginalSample = outputSample.getMarginal(outputIndex)
@@ -972,9 +974,7 @@ def plotConditionOutputAll(
         inputSample, marginalOutputSample, numberOfCuts
     )
     grid = ot.GridLayout(inputDimension, numberOfCuts)
-    grid.setTitle(
-        f"Sensitivity of {outputDescription[outputIndex]}, " f"n = {sampleSize}"
-    )
+    grid.setTitle(f"PDF of X | {outputDescription[outputIndex]}, " f"n = {sampleSize}")
     for inputIndex in range(inputDimension):
         distributionOutputList = distributionInputList[inputIndex]
         conditionalDistributionList = distributionOutputList[
