@@ -2,7 +2,6 @@ import unittest
 import numpy as np
 import otsensitivity as ots
 import openturns as ot
-from openturns.usecases import flood_model
 import openturns.viewer as otv
 from matplotlib import pylab as plt
 
@@ -45,8 +44,6 @@ class CheckEvent(unittest.TestCase):
 
         inputSample, outputSample = getFloodingSample(sampleSize)
 
-        verbose = True
-
         print("+ Distribution used for the input variables")
         inputDistribution = getFloodingInputDistribution()
 
@@ -57,14 +54,13 @@ class CheckEvent(unittest.TestCase):
         lowerValue = quantileLowerPoint[indexOutput]
         maxPoint = outputSample.getMax()
         upperValue = maxPoint[indexOutput]
-        grid = ots.plot_event(
+        grid = ots.plotConditionOutputBounds(
             inputSample,
             outputSample,
             indexOutput,
             lowerValue,
             upperValue,
             inputDistribution,
-            verbose,
         )
         title = grid.getTitle()
         grid.setTitle(f"Quantile at level {quantile_level}, {title}")
@@ -78,8 +74,6 @@ class CheckEvent(unittest.TestCase):
         sampleSize = 10000
 
         inputSample, outputSample = getFloodingSample(sampleSize)
-
-        verbose = True
 
         print("+ Distribution used for the input variables")
         # Si la loi est inconnue, on peut l'estimer par lissage à noyau
@@ -95,14 +89,13 @@ class CheckEvent(unittest.TestCase):
         lowerValue = quantileLowerPoint[indexOutput]
         maxPoint = outputSample.getMax()
         upperValue = maxPoint[indexOutput]
-        grid = ots.plot_event(
+        grid = ots.plotConditionOutputBounds(
             inputSample,
             outputSample,
             indexOutput,
             lowerValue,
             upperValue,
             inputDistribution,
-            verbose,
         )
         title = grid.getTitle()
         grid.setTitle(f"Quantile at level {quantile_level}, {title}")
@@ -116,8 +109,6 @@ class CheckEvent(unittest.TestCase):
         sampleSize = 10000
 
         inputSample, outputSample = getFloodingSample(sampleSize)
-
-        verbose = True
 
         print("+ Distribution used for the input variables")
         # Si la loi est inconnue, on peut l'estimer par lissage à noyau
@@ -141,20 +132,128 @@ class CheckEvent(unittest.TestCase):
         lowerValue = quantileLowerPoint[indexOutput]
         maxPoint = outputSample.getMax()
         upperValue = maxPoint[indexOutput]
-        grid = ots.plot_event(
+        grid = ots.plotConditionOutputBounds(
             inputSample,
             outputSample,
             indexOutput,
             lowerValue,
             upperValue,
             inputDistribution,
-            verbose,
         )
         title = grid.getTitle()
         grid.setTitle(f"Quantile at level {quantile_level}, {title}")
         view = otv.View(grid, figure_kw={"figsize": (8.0, 3.0)})
         plt.subplots_adjust(wspace=0.5, top=0.8, bottom=0.2)
         view.save("../doc/images/event_given_data_with_bounds.png")
+
+    def test_filterSample(self):
+        sample = ot.Sample(
+            [
+                [1.0, 2.0, 3.0],
+                [4.0, 5.0, 6.0],
+                [7.0, 8.0, 9.0],
+                [10.0, 11.0, 12.0],
+                [13.0, 14.0, 15.0],
+            ]
+        )
+        lowerBound = 9.0
+        upperBound = 15.0
+        columnIndex = 2
+        filteredSample = ots.filterSample(
+            sample,
+            lowerBound,
+            upperBound,
+            columnIndex,
+        )
+        referenceSample = ot.Sample([[7.0, 8.0, 9.0], [10.0, 11.0, 12.0]])
+        np.testing.assert_allclose(filteredSample, referenceSample)
+
+    def test_jointSample(self):
+        inputSample = ot.Sample(
+            [
+                [1.0, 2.0, 3.0],
+                [4.0, 5.0, 6.0],
+                [7.0, 8.0, 9.0],
+                [10.0, 11.0, 12.0],
+                [13.0, 14.0, 15.0],
+            ]
+        )
+        outputSample = ot.Sample(
+            [[-1.0, -2.0], [-4.0, -5.0], [-7.0, -8.0], [-10.0, -11.0], [-13.0, -14.0]]
+        )
+
+        joinXY = ots.joinInputOutputSample(inputSample, outputSample)
+        referenceSample = ot.Sample(
+            [
+                [1.0, 2.0, 3.0, -1.0, -2.0],
+                [4.0, 5.0, 6.0, -4.0, -5.0],
+                [7.0, 8.0, 9.0, -7.0, -8.0],
+                [10.0, 11.0, 12.0, -10.0, -11.0],
+                [13.0, 14.0, 15.0, -13.0, -14.0],
+            ]
+        )
+        np.testing.assert_allclose(joinXY, referenceSample)
+
+    def test_filterInputOutputSample(self):
+        inputSample = ot.Sample(
+            [
+                [1.0, 2.0, 3.0],
+                [4.0, 5.0, 6.0],
+                [7.0, 8.0, 9.0],
+                [10.0, 11.0, 12.0],
+                [13.0, 14.0, 15.0],
+            ]
+        )
+        outputSample = ot.Sample(
+            [[-1.0, -2.0], [-4.0, -5.0], [-7.0, -8.0], [-10.0, -11.0], [-13.0, -14.0]]
+        )
+        outputIndex = 1
+        lowerBound = -11.0
+        upperBound = -5.0
+        conditionedInputSample, conditionedOutputSample = ots.filterInputOutputSample(
+            inputSample, outputSample, outputIndex, lowerBound, upperBound
+        )
+        referenceConditionedInputSample = ot.Sample([[7, 8, 9], [10, 11, 12]])
+        referenceConditionedOutputSample = ot.Sample([[-7, -8], [-10, -11]])
+        np.testing.assert_allclose(
+            conditionedInputSample, referenceConditionedInputSample
+        )
+        np.testing.assert_allclose(
+            conditionedOutputSample, referenceConditionedOutputSample
+        )
+
+    def test_flooding_condition_input(self):
+        ot.Log.Show(ot.Log.NONE)
+
+        sampleSize = 10000
+
+        inputSample, outputSample = getFloodingSample(sampleSize)
+
+        print("+ Distribution used for the input variables")
+
+        grid = ots.plotConditionInputQuantileSequence(inputSample, outputSample)
+        view = otv.View(grid, figure_kw={"figsize": (8.0, 2.5)}, legend_kw={"bbox_to_anchor":(1.0, 1.0), "loc":"upper left"})
+        plt.subplots_adjust(wspace=0.5, top=0.8, bottom=0.2, right=0.8)
+        view.save("../doc/images/condition_input_sequence.png")
+
+    def test_flooding_condition_input_all(self):
+        ot.Log.Show(ot.Log.NONE)
+
+        sampleSize = 10000
+
+        inputSample, outputSample = getFloodingSample(sampleSize)
+
+        print("+ Distribution used for the input variables")
+
+        inputMarginalIndex = 0
+        grid = ots.plotConditionInputAll(
+            inputSample,
+            outputSample,
+            inputMarginalIndex,
+        )
+        view = otv.View(grid, figure_kw={"figsize": (11.0, 2.5)}, legend_kw={"bbox_to_anchor":(1.0, 1.0), "loc":"upper left"})
+        plt.subplots_adjust(wspace=0.8, top=0.8, bottom=0.2, right=0.8, left = 0.1)
+        view.save("../doc/images/condition_input_all.png")
 
 
 if __name__ == "__main__":

@@ -8,6 +8,9 @@ from .conditioning import (
     plotConditionOutputQuantile,
     plotConditionInputAll,
     plotConditionInputQuantileSequence,
+    filterSample,
+    joinInputOutputSample,
+    filterInputOutputSample,
 )
 
 __all__ = [
@@ -22,5 +25,8 @@ __all__ = [
     "plotConditionOutputQuantile",
     "plotConditionInputAll",
     "plotConditionInputQuantileSequence",
+    "filterSample",
+    "joinInputOutputSample",
+    "filterInputOutputSample",
 ]
 __version__ = "1.0"
