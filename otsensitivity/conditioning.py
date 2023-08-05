@@ -408,7 +408,7 @@ def computeOutputDistributionConditionalyOnInput(
 
     Return
     ------
-    outputDistributionList: list(numberOfSplit)
+    outputDistributionList: list(numberOfCuts)
         The number of splits is equal to numberOfBounds - 1.
         Each distribution is the conditional distribution of the
         output given that the input is in the specified interval defined
@@ -434,8 +434,8 @@ def computeOutputDistributionConditionalyOnInput(
     jointXYSample = joinInputOutputSample(inputSample, outputSample)
     outputMarginalIndex = inputDimension  # The output is the last column
     outputDistributionList = []
-    numberOfSplit = len(boundsList) - 1
-    for i in range(numberOfSplit):
+    numberOfCuts = len(boundsList) - 1
+    for i in range(numberOfCuts):
         lowerBound = boundsList[i]
         upperBound = boundsList[1 + i]
         conditionnedSample = filterSample(
@@ -452,10 +452,10 @@ def computeOutputDistributionConditionalyOnInput(
 
 
 def computeConditionInputQuantileDistributions(
-    inputSample, outputSample, numberOfSplit=5
+    inputSample, outputSample, numberOfCuts=5
 ):
     """
-    Condition on input with sequence of quantile levels and see the conditional output.
+    Condition on input with sequence of quantile levels and compute the conditional output distribution.
 
     Parameters
     ----------
@@ -463,7 +463,7 @@ def computeConditionInputQuantileDistributions(
         The input sample X.
     outputSample: ot.Sample(size, outputDimension)
         The output sample Y.
-    numberOfSplit: int
+    numberOfCuts: int
         The number of cuts of the quantile levels.
 
     Return
@@ -471,7 +471,7 @@ def computeConditionInputQuantileDistributions(
     distributionOutputList: list(list(list(ot.Distribution())))
         This is a list of outputDimension lists.
         Each sub-list has inputDimension sub-sub-lists.
-        Each sub-sub-list has numberOfSplit distributions.
+        Each sub-sub-list has numberOfCuts distributions.
         Each distribution is the distribution of the output conditionnaly
         that the input is in a given range defined by its quantiles.
     """
@@ -484,7 +484,7 @@ def computeConditionInputQuantileDistributions(
     inputDimension = inputSample.getDimension()
     outputDimension = outputSample.getDimension()
     #
-    alphaLevels = np.linspace(0.0, 1.0, 1 + numberOfSplit)
+    alphaLevels = np.linspace(0.0, 1.0, 1 + numberOfCuts)
     distributionOutputList = []
     for outputIndex in range(outputDimension):
         outputMarginalSample = outputSample.getMarginal(outputIndex)
@@ -494,7 +494,7 @@ def computeConditionInputQuantileDistributions(
             inputMarginalSample = inputSample.getMarginal(inputIndex)
             # Compute list of bounds
             boundsList = []
-            for i in range(1 + numberOfSplit):
+            for i in range(1 + numberOfCuts):
                 quantilePoint = inputMarginalSample.computeQuantilePerComponent(
                     alphaLevels[i]
                 )
@@ -503,9 +503,9 @@ def computeConditionInputQuantileDistributions(
             jointXYSample = joinInputOutputSample(
                 inputMarginalSample, outputMarginalSample
             )
-            outputDistributionList = []
-            numberOfSplit = len(boundsList) - 1
-            for i in range(numberOfSplit):
+            conditionalDistributionList = []
+            numberOfCuts = len(boundsList) - 1
+            for i in range(numberOfCuts):
                 lowerBound = boundsList[i]
                 upperBound = boundsList[1 + i]
                 conditionnedSample = filterSample(
@@ -516,8 +516,8 @@ def computeConditionInputQuantileDistributions(
                 )
                 outputConditionedMarginalSample = conditionnedSample.getMarginal(1)
                 kde = ot.KernelSmoothing().build(outputConditionedMarginalSample)
-                outputDistributionList.append(kde)
-            distributionInputList.append(outputDistributionList)
+                conditionalDistributionList.append(kde)
+            distributionInputList.append(conditionalDistributionList)
         distributionOutputList.append(distributionInputList)
     return distributionOutputList
 
@@ -526,7 +526,7 @@ def plotConditionInputAll(
     inputSample,
     outputSample,
     inputIndex,
-    numberOfSplit=5,
+    numberOfCuts=5,
 ):
     """
     Condition on input with sequence of quantile levels and see all plots of the conditional output.
@@ -539,12 +539,12 @@ def plotConditionInputAll(
         The output sample Y.
     inputIndex: int
         The index of an input.
-    outputBoundList: list(numberOfBounds)
-        The list of output bounds.
+    numberOfCuts: int, greater than 1
+        The number of cuts of the quantile levels.
 
     Return
     ------
-    grid: ot.GridLayout(outputDimension, numberOfSplit)
+    grid: ot.GridLayout(outputDimension, numberOfCuts)
         The number of splits defines partition of the [0, 1] interval into
         sub-intervals of equal lengths.
         Each sub-interval defines a interval of quantile  of the inputIndex-th input.
@@ -553,24 +553,35 @@ def plotConditionInputAll(
         The conditional distribution of the output is defined as Y | Xi in [a, b]
         where a and b are computed from a list of quantiles of the input.
     """
-    inputDimension = inputSample.getDimension()
-    outputDimension = outputSample.getDimension()
     sampleSize = inputSample.getSize()
-    inputDescription = inputSample.getDescription()
-    outputDescription = outputSample.getDescription()
+    if outputSample.getSize() != sampleSize:
+        raise ValueError(
+            f"The size of the input sample is {sampleSize} which "
+            f"does not match the size of the output sample {outputSample.getSize()}."
+        )
+    inputDimension = inputSample.getDimension()
     if inputIndex < 0 or inputIndex > inputDimension:
         raise ValueError(
             f"Input marginal index {inputIndex} is not in " f"[0, {inputDimension}]"
         )
-    # Compute the conditional distributions of the output
+    if numberOfCuts < 1:
+        raise ValueError(
+            f"The number of splits must be larger than 1, but is equal to {numberOfCuts}."
+        )
+    outputDimension = outputSample.getDimension()
+    inputDescription = inputSample.getDescription()
+    outputDescription = outputSample.getDescription()
     marginalInputSample = inputSample.getMarginal(inputIndex)
     distributionOutputList = computeConditionInputQuantileDistributions(
-        marginalInputSample, outputSample, numberOfSplit
+        marginalInputSample, outputSample, numberOfCuts
     )
-    grid = ot.GridLayout(outputDimension, numberOfSplit)
+    grid = ot.GridLayout(outputDimension, numberOfCuts)
+    grid.setTitle(
+        f"Sensitivity of {inputDescription[inputIndex]}, " f"n = {sampleSize}"
+    )
     for outputIndex in range(outputDimension):
         distributionInputList = distributionOutputList[outputIndex]
-        distributionList = distributionInputList[
+        conditionalDistributionList = distributionInputList[
             0
         ]  # There is only one input considered here
         outputMarginalSample = outputSample.getMarginal(outputIndex)
@@ -587,23 +598,20 @@ def plotConditionInputAll(
         ymin = unconditionalUpperBound[0]
         ymax = unconditionalUpperBound[1]
         #
-        grid.setTitle(
-            f"Sensitivity of {inputDescription[inputIndex]}, " f"n = {sampleSize}"
-        )
         # Compute list of bounds
-        alphaLevels = np.linspace(0.0, 1.0, 1 + numberOfSplit)
+        alphaLevels = np.linspace(0.0, 1.0, 1 + numberOfCuts)
         # Search for maximum PDF
-        for i in range(numberOfSplit):
-            conditionalDistribution = distributionList[i]
+        for i in range(numberOfCuts):
+            conditionalDistribution = conditionalDistributionList[i]
             curve = conditionalDistribution.drawPDF()
             curveMax = curve.getBoundingBox().getUpperBound()[1]
             ymax = max(ymax, curveMax)
         # Set common interval
         commonInterval = ot.Interval(unconditionalLowerBound, [ymin, ymax])
-        for i in range(numberOfSplit):
+        for i in range(numberOfCuts):
             alphaLevelMin = alphaLevels[i]
             alphaLevelMax = alphaLevels[i + 1]
-            conditionalDistribution = distributionList[i]
+            conditionalDistribution = conditionalDistributionList[i]
             graph = ot.Graph("", f"{outputDescription[outputIndex]}", "PDF", True)
             graph.add(unconditionalPDFCurve)
             curve = conditionalDistribution.drawPDF().getDrawable(0)
@@ -614,12 +622,12 @@ def plotConditionInputAll(
                 graph.setTitle(
                     f"{inputDescription[inputIndex]} in [{alphaLevelMin:.2f}, {alphaLevelMax:.2f}]"
                 )
-            if i < numberOfSplit - 1:
+            if i < numberOfCuts - 1:
                 graph.setLegends([""])
             graph.setColors(ot.Drawable().BuildDefaultPalette(2))
             if i > 0:
                 graph.setYTitle("")
-            if i == numberOfSplit - 1:
+            if i == numberOfCuts - 1:
                 graph.setLegendPosition("topright")
             graph.setBoundingBox(commonInterval)
             grid.setGraph(outputIndex, i, graph)
@@ -717,7 +725,7 @@ def createLighterPalette(baseColor, minimumValue, maximumValue, numberOfColors):
 def plotConditionInputQuantileSequence(
     inputSample,
     outputSample,
-    numberOfSplit=5,
+    numberOfCuts=5,
     minimumColorValue=0.5,
     maximumColorValue=1.0,
 ):
@@ -730,7 +738,7 @@ def plotConditionInputQuantileSequence(
         The input sample X.
     outputSample: ot.Sample(size, outputDimension)
         The output sample Y.
-    numberOfSplit: int, greater than 1
+    numberOfCuts: int, greater than 1
         The number of cuts of the quantile levels.
 
     Return
@@ -746,9 +754,9 @@ def plotConditionInputQuantileSequence(
             f"The size of the input sample is {sampleSize} which "
             f"does not match the size of the output sample {outputSample.getSize()}."
         )
-    if numberOfSplit < 1:
+    if numberOfCuts < 1:
         raise ValueError(
-            f"The number of splits must be larger than 1, but is equal to {numberOfSplit}."
+            f"The number of splits must be larger than 1, but is equal to {numberOfCuts}."
         )
     if (
         minimumColorValue > maximumColorValue
@@ -770,15 +778,15 @@ def plotConditionInputQuantileSequence(
     baseConditionalColor = baseColorPalette[1]
     baseColor = ot.Drawable.ConvertToRGB(baseConditionalColor)
     conditionalColorPalette = createLighterPalette(
-        baseColor, minimumColorValue, maximumColorValue, numberOfSplit
+        baseColor, minimumColorValue, maximumColorValue, numberOfCuts
     )
     #
-    alphaLevels = np.linspace(0.0, 1.0, 1 + numberOfSplit)
+    alphaLevels = np.linspace(0.0, 1.0, 1 + numberOfCuts)
     distributionOutputList = computeConditionInputQuantileDistributions(
-        inputSample, outputSample, numberOfSplit
+        inputSample, outputSample, numberOfCuts
     )
     grid = ot.GridLayout(outputDimension, inputDimension)
-    grid.setTitle(f"n = {sampleSize}, number of quantiles : {numberOfSplit}")
+    grid.setTitle(f"n = {sampleSize}, number of quantiles : {numberOfCuts}")
     for outputIndex in range(outputDimension):
         distributionInputList = distributionOutputList[outputIndex]
         outputMarginalSample = outputSample.getMarginal(outputIndex)
@@ -795,9 +803,9 @@ def plotConditionInputQuantileSequence(
         ymin = unconditionalPDFUpperBound[0]
         ymax = unconditionalPDFUpperBound[1]
         for inputIndex in range(inputDimension):
-            distributionList = distributionInputList[inputIndex]
-            for i in range(numberOfSplit):
-                conditionalDistribution = distributionList[i]
+            conditionalDistributionList = distributionInputList[inputIndex]
+            for i in range(numberOfCuts):
+                conditionalDistribution = conditionalDistributionList[i]
                 curve = conditionalDistribution.drawPDF()
                 curveMaximumDensity = curve.getBoundingBox().getUpperBound()[1]
                 ymax = max(ymax, curveMaximumDensity)
@@ -805,7 +813,7 @@ def plotConditionInputQuantileSequence(
         # Set common interval
         interval = ot.Interval(unconditionalPDFLowerBound, [ymin, ymax])
         for inputIndex in range(inputDimension):
-            distributionList = distributionInputList[inputIndex]
+            conditionalDistributionList = distributionInputList[inputIndex]
             graph = ot.Graph(
                 inputDescription[inputIndex],
                 outputDescription[outputIndex],
@@ -817,8 +825,8 @@ def plotConditionInputQuantileSequence(
             if inputIndex > 0:
                 graph.setYTitle("")
             graph.add(unconditionalPDFCurve)
-            for i in range(numberOfSplit):
-                conditionalDistribution = distributionList[i]
+            for i in range(numberOfCuts):
+                conditionalDistribution = conditionalDistributionList[i]
                 curve = conditionalDistribution.drawPDF().getDrawable(0)
                 curve.setLegend(f"[{alphaLevels[i]:.1f}, {alphaLevels[1 + i]:.1f}]")
                 curve.setLineWidth(1.0)
@@ -830,4 +838,193 @@ def plotConditionInputQuantileSequence(
             else:
                 graph.setLegendPosition("topright")
             grid.setGraph(outputIndex, inputIndex, graph)
+    return grid
+
+
+def computeConditionOutputQuantileDistributions(
+    inputSample, outputSample, numberOfCuts=5
+):
+    """
+    Condition on output with sequence of quantile levels and compute the conditional input distribution.
+
+    See computeConditionInputQuantileDistributions() for the procedure when we condition
+    on input.
+
+    Parameters
+    ----------
+    inputSample: ot.Sample(size, inputDimension)
+        The input sample X.
+    outputSample: ot.Sample(size, outputDimension)
+        The output sample Y.
+    numberOfCuts: int
+        The number of cuts of the quantile levels.
+
+    Return
+    ------
+    distributionOutputList: list(list(list(ot.Distribution())))
+        This is a list of outputDimension lists.
+        Each sub-list has inputDimension sub-sub-lists.
+        Each sub-sub-list has numberOfCuts distributions.
+        Each distribution is the distribution of the output conditionnaly
+        that the input is in a given range defined by its quantiles.
+    """
+    sampleSize = inputSample.getSize()
+    if outputSample.getSize() != sampleSize:
+        raise ValueError(
+            f"The size of the input sample is {sampleSize} which "
+            f"does not match the size of the output sample {outputSample.getSize()}."
+        )
+    inputDimension = inputSample.getDimension()
+    outputDimension = outputSample.getDimension()
+    #
+    alphaLevels = np.linspace(0.0, 1.0, 1 + numberOfCuts)
+    distributionInputList = []
+    for inputIndex in range(inputDimension):
+        inputMarginalSample = inputSample.getMarginal(inputIndex)
+        # Compute the list of conditional distributions for all outputs
+        distributionOutputList = []
+        for outputIndex in range(outputDimension):
+            outputMarginalSample = outputSample.getMarginal(outputIndex)
+            # Compute list of bounds
+            boundsList = []
+            for i in range(1 + numberOfCuts):
+                quantilePoint = outputMarginalSample.computeQuantilePerComponent(
+                    alphaLevels[i]
+                )
+                boundsList.append(quantilePoint[0])
+            # Compute conditional distributions: condition on Y, compute the distribution of X | Y
+            jointXYSample = joinInputOutputSample(
+                inputMarginalSample, outputMarginalSample
+            )
+            conditionalDistributionList = []
+            numberOfCuts = len(boundsList) - 1
+            for i in range(numberOfCuts):
+                lowerBound = boundsList[i]
+                upperBound = boundsList[1 + i]
+                conditionnedSample = filterSample(
+                    jointXYSample,
+                    lowerBound,
+                    upperBound,
+                    1,
+                )
+                inputConditionedMarginalSample = conditionnedSample.getMarginal(0)
+                kde = ot.KernelSmoothing().build(inputConditionedMarginalSample)
+                conditionalDistributionList.append(kde)
+            distributionOutputList.append(conditionalDistributionList)
+        distributionInputList.append(distributionOutputList)
+    return distributionInputList
+
+
+def plotConditionOutputAll(
+    inputSample,
+    outputSample,
+    outputIndex,
+    numberOfCuts=5,
+):
+    """
+    Condition on output with sequence of quantile levels and see all plots of the conditional input.
+
+    See plotConditionInputAll() for the same procedure when
+    we condition on input.
+
+    Parameters
+    ----------
+    inputSample: ot.Sample(size, inputDimension)
+        The input sample X.
+    outputSample: ot.Sample(size, outputDimension)
+        The output sample Y.
+    outputIndex: int
+        The index of an output.
+    numberOfCuts: int, greater than 1
+        The number of cuts of the quantile levels.
+
+    Return
+    ------
+    grid: ot.GridLayout(inputDimension, numberOfCuts)
+        The number of splits defines partition of the [0, 1] interval into
+        sub-intervals of equal lengths.
+        Each sub-interval defines a interval of quantile  of the inputIndex-th input.
+        Each plot represents the unconditional and conditional distribution
+        of the ouput with respect to the inputIndex-th input.
+        The conditional distribution of the output is defined as Xi | Y in [a, b]
+        where a and b are computed from a list of quantiles of the output.
+    """
+    sampleSize = inputSample.getSize()
+    if outputSample.getSize() != sampleSize:
+        raise ValueError(
+            f"The size of the input sample is {sampleSize} which "
+            f"does not match the size of the output sample {outputSample.getSize()}."
+        )
+    outputDimension = outputSample.getDimension()
+    if outputIndex < 0 or outputIndex > outputDimension:
+        raise ValueError(
+            f"Output marginal index {outputIndex} is not in " f"[0, {outputDimension}]"
+        )
+    if numberOfCuts < 1:
+        raise ValueError(
+            f"The number of splits must be larger than 1, but is equal to {numberOfCuts}."
+        )
+    inputDimension = inputSample.getDimension()
+    inputDescription = inputSample.getDescription()
+    outputDescription = outputSample.getDescription()
+    marginalOutputSample = outputSample.getMarginal(outputIndex)
+    distributionInputList = computeConditionOutputQuantileDistributions(
+        inputSample, marginalOutputSample, numberOfCuts
+    )
+    grid = ot.GridLayout(inputDimension, numberOfCuts)
+    grid.setTitle(
+        f"Sensitivity of {outputDescription[outputIndex]}, " f"n = {sampleSize}"
+    )
+    for inputIndex in range(inputDimension):
+        distributionOutputList = distributionInputList[inputIndex]
+        conditionalDistributionList = distributionOutputList[
+            0
+        ]  # There is only one output considered here
+        inputMarginalSample = inputSample.getMarginal(inputIndex)
+        # Unconditional input distribution. TODO: get the input distribution here.
+        inputDistribution = ot.KernelSmoothing().build(inputMarginalSample)
+        unconditionalPDFPlot = inputDistribution.drawPDF()
+        unconditionalPDFCurve = unconditionalPDFPlot.getDrawable(0)
+        unconditionalPDFCurve.setLineStyle("dashed")
+        unconditionalPDFCurve.setLegend("Unconditional")
+        # Comput common bounding box
+        unconditionalPDFBoundingBox = unconditionalPDFPlot.getBoundingBox()
+        unconditionalLowerBound = unconditionalPDFBoundingBox.getLowerBound()
+        unconditionalUpperBound = unconditionalPDFBoundingBox.getUpperBound()
+        ymin = unconditionalUpperBound[0]
+        ymax = unconditionalUpperBound[1]
+        #
+        # Compute list of bounds
+        alphaLevels = np.linspace(0.0, 1.0, 1 + numberOfCuts)
+        # Search for maximum PDF
+        for i in range(numberOfCuts):
+            conditionalDistribution = conditionalDistributionList[i]
+            curve = conditionalDistribution.drawPDF()
+            curveMax = curve.getBoundingBox().getUpperBound()[1]
+            ymax = max(ymax, curveMax)
+        # Set common interval
+        commonInterval = ot.Interval(unconditionalLowerBound, [ymin, ymax])
+        for i in range(numberOfCuts):
+            alphaLevelMin = alphaLevels[i]
+            alphaLevelMax = alphaLevels[i + 1]
+            conditionalDistribution = conditionalDistributionList[i]
+            graph = ot.Graph("", f"{inputDescription[inputIndex]}", "PDF", True)
+            graph.add(unconditionalPDFCurve)
+            curve = conditionalDistribution.drawPDF().getDrawable(0)
+            curve.setLegend("Conditional")
+            graph.add(curve)
+            #
+            if inputIndex == 0:
+                graph.setTitle(
+                    f"{outputDescription[outputIndex]} in [{alphaLevelMin:.2f}, {alphaLevelMax:.2f}]"
+                )
+            if i < numberOfCuts - 1:
+                graph.setLegends([""])
+            graph.setColors(ot.Drawable().BuildDefaultPalette(2))
+            if i > 0:
+                graph.setYTitle("")
+            if i == numberOfCuts - 1:
+                graph.setLegendPosition("topright")
+            graph.setBoundingBox(commonInterval)
+            grid.setGraph(inputIndex, i, graph)
     return grid

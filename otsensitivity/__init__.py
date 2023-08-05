@@ -11,6 +11,7 @@ from .conditioning import (
     filterSample,
     joinInputOutputSample,
     filterInputOutputSample,
+    plotConditionOutputAll,
 )
 
 __all__ = [
@@ -28,5 +29,6 @@ __all__ = [
     "filterSample",
     "joinInputOutputSample",
     "filterInputOutputSample",
+    "plotConditionOutputAll",
 ]
 __version__ = "1.0"
