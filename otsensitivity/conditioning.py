@@ -1,21 +1,23 @@
 # Copyright (C) Michaël Baudin (2023)
 # -*- coding: utf-8 -*-
 """
-Let Y=g(X) be the scalar output of 
-the model g with vector input X with dimension nx. 
-Let a < b be two real numbers. 
-We consider the event {a < Y < b}. 
-We want to compute the sensitivity of that event with respect to each input Xi. 
+Let Y=g(X) be the scalar output of
+the model g with vector input X with dimension nx.
+Let a < b be two real numbers.
+We consider the event {a < Y < b}.
+We want to compute the sensitivity of that event with respect to each input Xi.
 
-This script computes the conditional distribution of the input Xi given that the output Y is
-in the interval [a, b], for i=1,...,nx. 
-Compare that conditional distribution with 
-the unconditional distribution of Xi: 
+This script computes the conditional distribution of the
+input Xi given that the output Y is
+in the interval [a, b], for i=1,...,nx.
+Compare that conditional distribution with
+the unconditional distribution of Xi:
 if there is no difference, then the input Xi is not influential for that event.
 
 References
 ----------
-- Estimating Global Sensitivity Measures: Torturing the Data Until They Confess.
+- Estimating Global Sensitivity Measures:
+  Torturing the Data Until They Confess.
   Elmar Plischke. Institut für Endlagerforschung. TU Clausthal
   St. Étienne, MASCOT-NUM, April 10, 2015.
 """
@@ -95,13 +97,15 @@ def joinInputOutputSample(inputSample, outputSample):
     Return
     ------
     jointXYSample: ot.Sample(size, dimension)
-        The joint (X, Y) sample with dimension equal to inputDimension + outputDimension.
+        The joint (X, Y) sample with dimension equal
+        to inputDimension + outputDimension.
     """
     sampleSize = inputSample.getSize()
     if outputSample.getSize() != sampleSize:
         raise ValueError(
             f"The size of the input sample is {sampleSize} which "
-            f"does not match the size of the output sample {outputSample.getSize()}."
+            "does not match the size of the "
+            f"output sample {outputSample.getSize()}."
         )
     jointXYSample = ot.Sample(inputSample)  # Make a copy
     jointXYSample.stack(outputSample)
@@ -112,7 +116,7 @@ def filterInputOutputSample(
     inputSample, outputSample, outputIndex, lowerBound, upperBound
 ):
     """
-    Filter out the rows in the input and output sample given bounds on the output.
+    Filter out the rows in the input and output sample.
 
     Return a pair of (input, output) sample with a reduced sample size.
     Each row of the filtered sample is such that the specified column
@@ -154,7 +158,8 @@ def filterInputOutputSample(
     if outputSample.getSize() != sampleSize:
         raise ValueError(
             f"The size of the input sample is {sampleSize} which "
-            f"does not match the size of the output sample {outputSample.getSize()}."
+            "does not match the size of the "
+            f"output sample {outputSample.getSize()}."
         )
     if outputIndex < 0 or outputIndex > outputSample.getDimension():
         raise ValueError(
@@ -175,10 +180,8 @@ def filterInputOutputSample(
     # 3. Split into X and Y
     outputDimension = outputSample.getDimension()
     conditionedInputSample = conditionedXYSample[:, 0:inputDimension]
-    conditionedOutputSample = conditionedXYSample[
-        :, inputDimension : inputDimension + outputDimension
-    ]
-
+    totalDimension = inputDimension + outputDimension
+    conditionedOutputSample = conditionedXYSample[:, inputDimension:totalDimension]
     return conditionedInputSample, conditionedOutputSample
 
 
@@ -197,13 +200,16 @@ def plotConditionOutputBounds(
     the model g with vector input X with dimension nx.
     Let a < b be two real numbers.
     We consider the event {a <= Y < b}.
-    We want to compute the sensitivity of that event with respect to each input Xi.
+    We want to compute the sensitivity of that event with
+    respect to each input Xi.
 
-    This script computes the conditional distribution of the input Xi given that the output Y is
+    This script computes the conditional distribution of the
+    input Xi given that the output Y is
     in the interval [a, b], for i=1,...,nx.
     Compare that conditional distribution with
     the unconditional distribution of Xi:
-    if there is no difference, then the input Xi is not influential for that event.
+    if there is no difference, then the input Xi is not influential
+    for that event.
 
     Parameters
     ----------
@@ -225,10 +231,10 @@ def plotConditionOutputBounds(
     ------
     grid: ot.GridLayout(1, 1 + inputDimension)
         The grid of sensitivity plots.
-        The i-th plot presents the unconditional and conditional distribution of the
-        i-th input to the outputIndex-th output.
-        The last plot presents the unconditional and conditional distribution of the
-        outputIndex-th output.
+        The i-th plot presents the unconditional and conditional
+        distribution of the i-th input to the outputIndex-th output.
+        The last plot presents the unconditional and conditional
+        distribution of the outputIndex-th output.
     """
 
     def plot_unconditional_and_conditional_distribution(
@@ -248,7 +254,7 @@ def plotConditionOutputBounds(
         # Plot conditional distribution
         curve = conditionalDistribution.drawPDF().getDrawable(0)
         curve.setLegend(
-            f"{marginalOutputDescription} in [{lowerBound:.3e}, {upperBound:.3e}]"
+            f"{marginalOutputDescription} in " f"[{lowerBound:.3e}, {upperBound:.3e}]"
         )
         graph.add(curve)
         #
@@ -455,7 +461,7 @@ def computeConditionInputQuantileDistributions(
     inputSample, outputSample, numberOfCuts=5
 ):
     """
-    Condition on input with sequence of quantile levels and compute the conditional output distribution.
+    Condition on input with quantile levels and compute the conditional output distribution.
 
     Parameters
     ----------
@@ -529,7 +535,7 @@ def plotConditionInputAll(
     numberOfCuts=5,
 ):
     """
-    Condition on input with sequence of quantile levels and see all plots of the conditional output.
+    Condition on input with quantile levels and plots of the conditional output.
 
     Parameters
     ----------
@@ -620,7 +626,8 @@ def plotConditionInputAll(
             #
             if outputIndex == 0:
                 graph.setTitle(
-                    f"{inputDescription[inputIndex]} in [{alphaLevelMin:.2f}, {alphaLevelMax:.2f}]"
+                    f"{inputDescription[inputIndex]} in "
+                    f"[{alphaLevelMin:.2f}, {alphaLevelMax:.2f}]"
                 )
             if i < numberOfCuts - 1:
                 graph.setLegends([""])
@@ -632,49 +639,6 @@ def plotConditionInputAll(
             graph.setBoundingBox(commonInterval)
             grid.setGraph(outputIndex, i, graph)
     return grid
-
-
-def createLighterPalette(baseColor, minimumValue, maximumValue, numberOfColors):
-    """ "
-    Create a palette based on a base color and bounds of the value channel.
-
-    In the HSV color map, the value (or V) channel is the "brightness" of the color.
-    This function creates a list of colors - or palette - by creating a
-    linear scale between two bounds.
-
-    Parameters
-    ----------
-    baseColor: [r, g, b]
-        The base hexadecimal color in RGB color space where
-        0 <= r <= 1, 0 <= g <= 1, 0 <= b <= 1.
-    minimumValue: float, in [0, 1]
-        The minimum value.
-    maximumValue: float, in [0, 1]
-        The maximum value.
-        We must have maximumValue >= minimumValue.
-    numberOfColors: int
-        The number of colors in the palette.
-
-    Return
-    ------
-    colorPalette: list(numberOfColors)
-        The list of colors strings as hexadecimal codes.
-    """
-    if minimumValue > maximumValue:
-        raise ValueError(
-            f"The minimum value {minimumValue} is greater "
-            f"than the maximum value {maximumValue}."
-        )
-    if numberOfColors < 1:
-        raise ValueError(f"The number of colors {numberOfColors} is lower than 1.")
-    r, g, b = baseColor
-    h, s, v = ot.Drawable.ConvertFromRGBIntoHSV(r, g, b)
-    valueArray = np.linspace(minimumValue, maximumValue, numberOfColors)
-    colorPalette = []
-    for i in range(numberOfColors):
-        hexColor = ot.Drawable.ConvertFromHSV(h, s, valueArray[i])
-        colorPalette.append(hexColor)
-    return colorPalette
 
 
 def createLighterPalette(
@@ -773,8 +737,10 @@ def plotConditionInputQuantileSequence(
         or maximumColorValue > 1.0
     ):
         raise ValueError(
-            f"The minimum color value is equal to {minimumColorValue} (must be >= 0.0) and "
-            f"the maximum color value is equal to {maximumColorValue} (must be <= 1.0), which is inconsistent."
+            f"The minimum color value is equal to {minimumColorValue} "
+            "(must be >= 0.0) and "
+            f"the maximum color value is equal to {maximumColorValue} "
+            "(must be <= 1.0), which is inconsistent."
         )
     inputDimension = inputSample.getDimension()
     outputDimension = outputSample.getDimension()
@@ -855,7 +821,7 @@ def computeConditionOutputQuantileDistributions(
     inputSample, outputSample, numberOfCuts=5
 ):
     """
-    Condition on output with sequence of quantile levels and compute the conditional input distribution.
+    Condition on output with quantile levels and compute the conditional input distribution.
 
     See computeConditionInputQuantileDistributions() for the procedure when we condition
     on input.
@@ -878,7 +844,6 @@ def computeConditionOutputQuantileDistributions(
         Each distribution is the distribution of the intput conditionnaly
         that the output is in a given range defined by its quantiles.
     """
-    print(f"+ computeConditionOutputQuantileDistributions()")
     sampleSize = inputSample.getSize()
     if outputSample.getSize() != sampleSize:
         raise ValueError(
@@ -933,7 +898,7 @@ def plotConditionOutputAll(
     numberOfCuts=5,
 ):
     """
-    Condition on output with sequence of quantile levels and see all plots of the conditional input.
+    Condition on output with sequence of quantile levels and plot conditional input.
 
     See plotConditionInputAll() for the same procedure when
     we condition on input.
@@ -1025,7 +990,8 @@ def plotConditionOutputAll(
             #
             if inputIndex == 0:
                 graph.setTitle(
-                    f"{outputDescription[outputIndex]} in [{alphaLevelMin:.2f}, {alphaLevelMax:.2f}]"
+                    f"{outputDescription[outputIndex]} in "
+                    f"[{alphaLevelMin:.2f}, {alphaLevelMax:.2f}]"
                 )
             if i < numberOfCuts - 1:
                 graph.setLegends([""])
@@ -1086,8 +1052,10 @@ def plotConditionOutputQuantileSequence(
         or maximumColorValue > 1.0
     ):
         raise ValueError(
-            f"The minimum color value is equal to {minimumColorValue} (must be >= 0.0) and "
-            f"the maximum color value is equal to {maximumColorValue} (must be <= 1.0), which is inconsistent."
+            f"The minimum color value is equal to {minimumColorValue} "
+            "(must be >= 0.0) and "
+            f"the maximum color value is equal to {maximumColorValue} "
+            "(must be <= 1.0), which is inconsistent."
         )
     inputDimension = inputSample.getDimension()
     outputDimension = outputSample.getDimension()
@@ -1152,7 +1120,8 @@ def plotConditionOutputQuantileSequence(
                 conditionalDistribution = conditionalDistributionList[i]
                 curve = conditionalDistribution.drawPDF().getDrawable(0)
                 curve.setLegend(
-                    f"{outputDescription[outputIndex]} in [{alphaLevels[i]:.1f}, {alphaLevels[1 + i]:.1f}]"
+                    f"{outputDescription[outputIndex]} in "
+                    f"[{alphaLevels[i]:.1f}, {alphaLevels[1 + i]:.1f}]"
                 )
                 curve.setLineWidth(1.0)
                 curve.setColor(conditionalColorPalette[i])
