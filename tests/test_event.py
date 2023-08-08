@@ -263,6 +263,48 @@ class CheckEvent(unittest.TestCase):
         plt.subplots_adjust(wspace=0.8, top=0.8, bottom=0.2, right=0.8, left=0.1)
         view.save("../doc/images/condition_input_all.png")
 
+    def test_flooding_condition_output_all(self):
+        ot.Log.Show(ot.Log.NONE)
+
+        sampleSize = 10000
+
+        inputSample, outputSample = getFloodingSample(sampleSize)
+
+        inputDistribution = getFloodingInputDistribution()
+        grid = ots.plotConditionOutputAll(
+            inputSample,
+            outputSample,
+            inputDistribution,
+        )
+        view = otv.View(
+            grid,
+            figure_kw={"figsize": (11.0, 2.5)},
+            legend_kw={"bbox_to_anchor": (1.0, 1.0), "loc": "upper left"},
+        )
+        plt.subplots_adjust(wspace=0.8, top=0.8, bottom=0.2, right=0.8, left=0.1)
+        view.save("../doc/images/condition_output_all.png")
+
+    def test_flooding_condition_output_sequence(self):
+        ot.Log.Show(ot.Log.NONE)
+
+        sampleSize = 10000
+
+        inputSample, outputSample = getFloodingSample(sampleSize)
+
+        inputDistribution = getFloodingInputDistribution()
+        grid = ots.plotConditionOutputQuantileSequence(
+            inputSample,
+            outputSample,
+            inputDistribution,
+        )
+        view = otv.View(
+            grid,
+            figure_kw={"figsize": (11.0, 2.5)},
+            legend_kw={"bbox_to_anchor": (1.0, 1.0), "loc": "upper left"},
+        )
+        plt.subplots_adjust(wspace=0.8, top=0.8, bottom=0.2, right=0.8, left=0.1)
+        view.save("../doc/images/condition_output_grid.png")
+
 
 if __name__ == "__main__":
     import matplotlib

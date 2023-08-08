@@ -333,7 +333,8 @@ def plotConditionOutputQuantile(
 
     For all output marginal indices i from 0 to outputDimension - 1,
     we compute marginal output bounds as follows:
-    - the minimum bound is the quantile of given level of the output marginal sample,
+    - the minimum bound is the quantile of given level of the
+      output marginal sample,
     - the maximum bound is the sample maximum of the output marginal sample.
     Then we call plot_event_from_bounds().
     Finally, we gather each marginal plot into a single grid of plots.
@@ -353,10 +354,10 @@ def plotConditionOutputQuantile(
     ------
     grid: ot.GridLayout(1, 1 + inputDimension)
         The grid of sensitivity plots.
-        The i-th plot presents the unconditional and conditional distribution of the
-        i-th input to the outputIndex-th output.
-        The last plot presents the unconditional and conditional distribution of the
-        outputIndex-th output.
+        The i-th plot presents the unconditional and conditional
+        distribution of the i-th input to the outputIndex-th output.
+        The last plot presents the unconditional and conditional
+        distribution of the outputIndex-th output.
     """
     outputDimension = outputSample.getDimension()
     inputDimension = inputSample.getDimension()
@@ -894,7 +895,8 @@ def computeConditionOutputQuantileDistributions(
 def plotConditionOutputAll(
     inputSample,
     outputSample,
-    outputIndex,
+    inputDistribution,
+    outputIndex=0,
     numberOfCuts=5,
 ):
     """
@@ -909,8 +911,11 @@ def plotConditionOutputAll(
         The input sample X.
     outputSample: ot.Sample(size, outputDimension)
         The output sample Y.
+    inputDistribution : ot.Distribution(inputDimension)
+        The distribution of the input sample.
     outputIndex: int
         The index of an output.
+        The default value is outputIndex=0.
     numberOfCuts: int, greater than 1
         The number of cuts of the quantile levels.
 
@@ -954,10 +959,8 @@ def plotConditionOutputAll(
         conditionalDistributionList = distributionOutputList[
             0
         ]  # There is only one output considered here
-        inputMarginalSample = inputSample.getMarginal(inputIndex)
-        # Unconditional input distribution. TODO: get the input distribution here.
-        inputDistribution = ot.KernelSmoothing().build(inputMarginalSample)
-        unconditionalPDFPlot = inputDistribution.drawPDF()
+        marginalInputDistribution = inputDistribution.getMarginal(inputIndex)
+        unconditionalPDFPlot = marginalInputDistribution.drawPDF()
         unconditionalPDFCurve = unconditionalPDFPlot.getDrawable(0)
         unconditionalPDFCurve.setLineStyle("dashed")
         unconditionalPDFCurve.setLegend("Unconditional")
@@ -1008,6 +1011,7 @@ def plotConditionOutputAll(
 def plotConditionOutputQuantileSequence(
     inputSample,
     outputSample,
+    inputDistribution,
     numberOfCuts=5,
     minimumColorValue=0.5,
     maximumColorValue=1.0,
@@ -1021,8 +1025,11 @@ def plotConditionOutputQuantileSequence(
         The input sample X.
     outputSample: ot.Sample(size, outputDimension)
         The output sample Y.
+    inputDistribution : ot.Distribution(inputDimension)
+        The distribution of the input sample.
     numberOfCuts: int, greater than 1
         The number of cuts of the quantile levels.
+        The default value is numberOfCuts=5.
     minimumValue: float, in [0, 1]
         The minimum value.
     maximumValue: float, in [0, 1]
@@ -1081,10 +1088,8 @@ def plotConditionOutputQuantileSequence(
     )
     for inputIndex in range(inputDimension):
         distributionOutputList = distributionInputList[inputIndex]
-        inputMarginalSample = inputSample.getMarginal(inputIndex)
-        # Unconditional input distribution. TODO: replace this with the exact input distribution.
-        inputDistribution = ot.KernelSmoothing().build(inputMarginalSample)
-        unconditionalPDFPlot = inputDistribution.drawPDF()
+        marginalInputDistribution = inputDistribution.getMarginal(inputIndex)
+        unconditionalPDFPlot = marginalInputDistribution.drawPDF()
         unconditionalPDFCurve = unconditionalPDFPlot.getDrawable(0)
         unconditionalPDFCurve.setLineStyle("dashed")
         unconditionalPDFCurve.setColor(unconditionalColor)
