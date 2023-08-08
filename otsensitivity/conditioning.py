@@ -14,6 +14,18 @@ Compare that conditional distribution with
 the unconditional distribution of Xi:
 if there is no difference, then the input Xi is not influential for that event.
 
+TODO-List
+---------
+- Implement a RSA with binary threshold on output: Y < s and Y > s.
+  This is an option for plotConditionOutputQuantile, which replaces the 
+  unconditional distribution with the opposite event.
+- Rename plotConditionOutputQuantile into plotConditionOutputThreshold.
+- Implement the Kolmogorov-Smirnov statistic in plotConditionOutputThreshold
+  as suggested in (Pianosi, 2016) eq. 7 page 221.
+  This can only be done with the CDF option.
+  Move the PDF/CDF option to a attribute that does not have a "draw" name.
+  Can we suggest a statistic for a PDF?
+
 References
 ----------
 - Estimating Global Sensitivity Measures:
@@ -500,7 +512,7 @@ class RegionalSensitivityAnalysis:
             graph.add(curve)
             # Plot conditional distribution
             if self.isDrawPDF:
-                curve = conditionalDistribution.drawCDF().getDrawable(0)
+                curve = conditionalDistribution.drawPDF().getDrawable(0)
             else:
                 curve = conditionalDistribution.drawCDF().getDrawable(0)
             curve.setLegend(
