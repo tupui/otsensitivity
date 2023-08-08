@@ -4,15 +4,10 @@ from .cosi import cosi
 from .visualization import plot_indices, pairplot
 from .moments import cusunoro, ecdf, moment_independent
 from .conditioning import (
-    plotConditionOutputBounds,
-    plotConditionOutputQuantile,
-    plotConditionInputAll,
-    plotConditionInputQuantileSequence,
+    RegionalSensitivityAnalysis,
     filterSample,
     joinInputOutputSample,
     filterInputOutputSample,
-    plotConditionOutputAll,
-    plotConditionOutputQuantileSequence,
 )
 
 __all__ = [
@@ -23,14 +18,9 @@ __all__ = [
     "moment_independent",
     "plot_indices",
     "pairplot",
-    "plotConditionOutputBounds",
-    "plotConditionOutputQuantile",
-    "plotConditionInputAll",
-    "plotConditionInputQuantileSequence",
+    "RegionalSensitivityAnalysis",
     "filterSample",
     "joinInputOutputSample",
     "filterInputOutputSample",
-    "plotConditionOutputAll",
-    "plotConditionOutputQuantileSequence",
 ]
 __version__ = "1.0"
