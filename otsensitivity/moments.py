@@ -40,11 +40,11 @@ def save_show(fname, figures, **kwargs):
     if fname is not None:
         pdf = matplotlib.backends.backend_pdf.PdfPages(fname)
         for fig in figures:
-            pdf.savefig(fig, transparent=True, bbox_inches='tight', **kwargs)
+            pdf.savefig(fig, transparent=True, bbox_inches="tight", **kwargs)
         pdf.close()
     else:
         plt.show()
-    plt.close('all')
+    plt.close("all")
 
 
 def cusunoro(sample, data, plabels=None, fname=None):
@@ -71,13 +71,13 @@ def cusunoro(sample, data, plabels=None, fname=None):
 
     ns, dim = sample.shape
     if plabels is None:
-        plabels = ['x' + str(i) for i in range(dim)]
+        plabels = ["x" + str(i) for i in range(dim)]
 
     fig, ax = plt.subplots(1, 2, figsize=(10, 5))
 
     # Normalization (mean=0, var=1) for first and second moment
-    diff_y = (data - data.mean())
-    w = diff_y ** 2
+    diff_y = data - data.mean()
+    w = diff_y**2
     ynorm = (diff_y) / (ns * np.std(data))
     ynorm2 = (w - w.mean()) / (ns * np.std(w))
 
@@ -105,8 +105,8 @@ def cusunoro(sample, data, plabels=None, fname=None):
 
     for k in [0, 1]:
         ax[k].set_xlabel("Empirical CDF of model parameters")
-    ax[0].set_ylabel('Cumulative sums of normalized model output')
-    ax[1].set_ylabel('Cumulative sums for second moment')
+    ax[0].set_ylabel("Cumulative sums of normalized model output")
+    ax[1].set_ylabel("Cumulative sums for second moment")
 
     ax[1].legend(bbox_to_anchor=(1.04, 1), loc="upper left")
 
@@ -159,11 +159,11 @@ def moment_independent(sample, data, plabels=None, scale_plt=True, fname=None):
     ns, dim = sample.shape
     ns = float(ns)
     if plabels is None:
-        plabels = ['x' + str(i) for i in range(dim)]
+        plabels = ["x" + str(i) for i in range(dim)]
     else:
         plabels = plabels
 
-    s_indices = {'Kolmogorov': [], 'Kuiper': [], 'Delta': [], 'Cramer': [], 'Sobol': []}
+    s_indices = {"Kolmogorov": [], "Kuiper": [], "Delta": [], "Cramer": [], "Sobol": []}
     n_parts = int(min(np.ceil(ns ** (2 / (7 + np.tanh((1500 - ns) / 500)))), 48))
     len_part = ns / n_parts
 
@@ -197,12 +197,12 @@ def moment_independent(sample, data, plabels=None, scale_plt=True, fname=None):
 
         for i in range(n_parts):
             # Conditional PDF
-            data_ = data_r[int(i * len_part):int((i + 1) * len_part)]
+            data_ = data_r[int(i * len_part) : int((i + 1) * len_part)]
             ks_c = ot.KernelSmoothing()
             pdf_c = ks_c.build(ot.Sample(data_[:, None]))
             pdf_c = np.array(pdf_c.computePDF(xs[:, None])).flatten()
 
-            axs_[0].plot(xs, pdf_c, alpha=.3)
+            axs_[0].plot(xs, pdf_c, alpha=0.3)
 
             # sup-ylim for plotting
             max_ = max(pdf_c)
@@ -210,12 +210,12 @@ def moment_independent(sample, data, plabels=None, scale_plt=True, fname=None):
 
             # Conditional ECDF
             ecdf_c = ecdf(data_)
-            axs_[1].plot(ecdf_c[0], ecdf_c[1], alpha=.3)
+            axs_[1].plot(ecdf_c[0], ecdf_c[1], alpha=0.3)
 
             # Metrics
             data_all = np.concatenate([ecdf_u[0], ecdf_c[0]])
-            cdf1 = np.searchsorted(ecdf_u[0], data_all, side='right') / ns
-            cdf2 = np.searchsorted(ecdf_c[0], data_all, side='right') / len_part
+            cdf1 = np.searchsorted(ecdf_u[0], data_all, side="right") / ns
+            cdf2 = np.searchsorted(ecdf_c[0], data_all, side="right") / len_part
             cdf_diff = cdf1 - cdf2
 
             ks.append(np.max(np.absolute(cdf_diff)))
@@ -224,24 +224,27 @@ def moment_independent(sample, data, plabels=None, scale_plt=True, fname=None):
             var_d += (len_part / ns) * (data_.mean() - mean_t) ** 2
 
             xs_cdf = np.linspace(0, 1, len(cdf_diff))
-            cramer += (len_part / ns) * simps((cdf_diff) ** 2, xs_cdf)\
+            cramer += (
+                (len_part / ns)
+                * simps((cdf_diff) ** 2, xs_cdf)
                 / np.trapz((cdf1 * (1 - cdf1)), xs_cdf)
+            )
 
         # Metrics
-        s_indices['Kolmogorov'].append(np.mean(ks))
-        s_indices['Kuiper'].append(np.mean(kui))
-        s_indices['Delta'].append(delta)
-        s_indices['Cramer'].append(cramer)
-        s_indices['Sobol'].append(var_d / var_t)
+        s_indices["Kolmogorov"].append(np.mean(ks))
+        s_indices["Kuiper"].append(np.mean(kui))
+        s_indices["Delta"].append(delta)
+        s_indices["Cramer"].append(cramer)
+        s_indices["Sobol"].append(var_d / var_t)
 
         # Plots
-        axs_[0].plot(xs, pdf_u, c='k', linewidth=2)
-        axs_[0].set_ylabel('PDF')
+        axs_[0].plot(xs, pdf_u, c="k", linewidth=2)
+        axs_[0].set_ylabel("PDF")
 
-        axs_[1].plot(ecdf_u[0], ecdf_u[1], c='k', linewidth=2)
-        axs_[1].set_ylabel('CDF')
+        axs_[1].plot(ecdf_u[0], ecdf_u[1], c="k", linewidth=2)
+        axs_[1].set_ylabel("CDF")
 
-        axs_[1].set_xlabel('Y|' + plabels[d])
+        axs_[1].set_xlabel("Y|" + plabels[d])
 
     if scale_plt:
         for i in range(dim):

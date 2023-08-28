@@ -59,11 +59,16 @@ def sobol_saltelli(func, n_sample, dim, bounds=None):
 
     f_AB = []
     for i in range(dim):
-        f_AB.append(func(np.column_stack((A[:, 0:i], B[:, i], A[:, i+1:]))))
+        f_AB.append(func(np.column_stack((A[:, 0:i], B[:, i], A[:, i + 1 :]))))
 
     f_AB = np.asarray(f_AB).reshape(dim, n_sample)
 
     s = 1 / n_sample * np.sum(f_B * (np.subtract(f_AB, f_A.flatten()).T), axis=0) / var
-    st = 1 / (2 * n_sample) * np.sum(np.subtract(f_A.flatten(), f_AB).T ** 2, axis=0) / var
+    st = (
+        1
+        / (2 * n_sample)
+        * np.sum(np.subtract(f_A.flatten(), f_AB).T ** 2, axis=0)
+        / var
+    )
 
     return s, st
